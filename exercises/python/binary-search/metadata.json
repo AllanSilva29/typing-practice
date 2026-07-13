@@ -1,0 +1,7 @@
+{
+  "difficulty": "medium",
+  "category": "Algoritmos",
+  "comment": "Realiza busca binária iterativa em uma lista ordenada.",
+  "detailedExplanation": "Este script implementa o algoritmo de Busca Binária de forma iterativa em Python. Ele busca um elemento alvo em uma lista ordenada com complexidade de tempo O(log n), muito mais rápido do que a busca linear tradicional.\n\nPasso a passo:\n1. Inicializamos os ponteiros de limite: 'low = 0' representa o início da fatia pesquisada e 'high = len(arr) - 1' o final.\n2. O loop 'while low <= high' prossegue enquanto houver posições a serem analisadas.\n3. A linha 'mid = (low + high) // 2' calcula o elemento central usando divisão inteira (desprezando a fração decimal).\n4. A condição 'if arr[mid] == target' verifica se o elemento do meio é o valor procurado. Se sim, seu índice correspondente é retornado.\n5. A cláusula 'elif arr[mid] < target' verifica se o elemento do meio é menor que o alvo. Se for, descartamos toda a metade esquerda movendo 'low = mid + 1'.\n6. Caso contrário, descartamos a metade direita movendo 'high = mid - 1'.\n7. Se a pesquisa acabar sem correspondências, o algoritmo retorna -1.",
+  "expectedOutput": "[O resultado seria]: binary_search([1, 3, 5, 7, 9], 7) = 3"
+}

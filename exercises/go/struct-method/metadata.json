@@ -1,0 +1,7 @@
+{
+  "difficulty": "easy",
+  "category": "Estruturas de Dados",
+  "comment": "Define um tipo Retângulo e calcula sua área usando um método receiver.",
+  "detailedExplanation": "Este snippet em Go exemplifica a modelagem de dados utilizando structs e a vinculação de métodos por receptor (receiver).\n\nPasso a passo:\n1. O tipo 'Rect' é declarado como uma struct contendo os atributos 'width' (largura) e 'height' (altura) representados por ponto flutuante de 64 bits (float64).\n2. O método 'Area()' retorna a área calculada. Ele define um receptor por valor '(r Rect)'. Isso permite invocar o método em qualquer variável do tipo Rect, como se fosse um método de classe (ex: minhaStruct.Area()).\n3. O método calcula a área acessando os campos do receptor local e os multiplicando: 'r.width * r.height'.",
+  "expectedOutput": "[O resultado seria]: Area do retangulo Rect{12.5, 4.0} = 50.00"
+}

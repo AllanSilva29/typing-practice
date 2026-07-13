@@ -1,0 +1,65 @@
+{
+  "name": "typing-practice",
+  "displayName": "Prática de Digitação",
+  "description": "Extensão do VS Code estilo Monkeytype para praticar digitação de código diretamente no editor.",
+  "version": "0.0.1",
+  "publisher": "antigravity",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "typing-practice-sidebar",
+          "title": "Prática de Digitação",
+          "icon": "media/keyboard.svg"
+        }
+      ]
+    },
+    "views": {
+      "typing-practice-sidebar": [
+        {
+          "type": "webview",
+          "id": "typingPractice.sidebar",
+          "name": "Estatísticas e Opções"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "typingPractice.start",
+        "title": "Iniciar Prática de Digitação",
+        "category": "Typing Practice"
+      },
+      {
+        "command": "typingPractice.stop",
+        "title": "Parar Prática de Digitação",
+        "category": "Typing Practice"
+      },
+      {
+        "command": "typingPractice.reset",
+        "title": "Resetar Progresso",
+        "category": "Typing Practice"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --minify",
+    "watch": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --watch",
+    "compile": "tsc -p ./",
+    "watch-tsc": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.18",
+    "@types/vscode": "^1.75.0",
+    "esbuild": "^0.17.5",
+    "typescript": "^4.9.4"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "ES2021",
+    "outDir": "out",
+    "lib": [
+      "ES2021",
+      "DOM"
+    ],
+    "sourceMap": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "rootDir": "src"
+  },
+  "exclude": [
+    "node_modules",
+    ".vscode-test",
+    "exercises",
+    "**/.practice_session*"
+  ]
+}

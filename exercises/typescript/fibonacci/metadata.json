@@ -1,0 +1,7 @@
+{
+  "difficulty": "easy",
+  "category": "Algoritmos",
+  "comment": "Calcula recursivamente o enésimo número da sequência de Fibonacci.",
+  "detailedExplanation": "Este código calcula recursivamente o enésimo número da sequência de Fibonacci. A sequência inicia em 0 e 1, e cada termo subsequente é a soma dos dois anteriores (0, 1, 1, 2, 3, 5, 8, 13, 21...).\n\nPasso a passo:\n1. A assinatura 'function fibonacci(n: number): number' declara que a função recebe um argumento 'n' do tipo numérico e retorna um número.\n2. A condicional 'if (n <= 1) return n' é o caso base da recursão. Ela garante que se 'n' for 0 ou 1, a função retorne diretamente o próprio valor. Isso interrompe as chamadas recursivas e previne loops infinitos de estouro de pilha.\n3. A linha de retorno 'return fibonacci(n - 1) + fibonacci(n - 2)' invoca recursivamente a própria função duas vezes (para n-1 e n-2), somando os retornos para obter o valor atual da sequência correspondente.",
+  "expectedOutput": "[O resultado seria]: fibonacci(8) = 21"
+}

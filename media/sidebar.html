@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="{{cssUri}}" rel="stylesheet">
+  <title>Prática de Digitação</title>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Typing Practice</h1>
+      <p>Aprimore sua velocidade de código</p>
+    </div>
+
+    <!-- Prática Rápida -->
+    <div class="section-title">Prática Rápida</div>
+    <div class="control-card">
+      <div class="form-group">
+        <label for="language-select">Linguagem</label>
+        <select id="language-select">
+          <option value="all">Todas</option>
+          <option value="typescript">TypeScript</option>
+          <option value="javascript">JavaScript</option>
+          <option value="python">Python</option>
+          <option value="go">Go</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="difficulty-select">Dificuldade</label>
+        <select id="difficulty-select">
+          <option value="all">Todas</option>
+          <option value="easy">Fácil</option>
+          <option value="medium">Médio</option>
+          <option value="hard">Difícil</option>
+        </select>
+      </div>
+
+      <button id="start-btn" class="btn btn-primary">▶ Praticar agora</button>
+      <button id="stop-btn" class="btn btn-danger" style="display: none;">⏹ Parar prática</button>
+    </div>
+
+    <!-- Navegar por Exercícios (Tree View) -->
+    <div class="section-title">Navegar por Exercícios</div>
+    <div id="tree-container" class="tree-container">
+      <div class="no-history">Carregando exercícios...</div>
+    </div>
+
+    <!-- Estatísticas Gerais -->
+    <div class="section-title">Suas Estatísticas</div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-val" id="stat-total">0</div>
+        <div class="stat-lbl">Concluídos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="stat-ppm">0</div>
+        <div class="stat-lbl">Média PPM</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="stat-accuracy">0%</div>
+        <div class="stat-lbl">Precisão</div>
+      </div>
+    </div>
+
+    <!-- Histórico de Progresso -->
+    <div class="section-title">Histórico de Progresso</div>
+    <div id="history-list" class="history-list">
+      <div class="no-history">Nenhuma prática concluída ainda.</div>
+    </div>
+
+    <!-- Limpar Progresso -->
+    <button id="reset-btn" class="btn btn-secondary">Limpar Histórico</button>
+  </div>
+
+  <script src="{{jsUri}}"></script>
+</body>
+</html>

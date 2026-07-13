@@ -1,0 +1,7 @@
+{
+  "difficulty": "medium",
+  "category": "Estruturas de Dados",
+  "comment": "Implementação simples de uma estrutura de dados de Pilha genérica.",
+  "detailedExplanation": "Esta é uma implementação clássica de uma estrutura de dados de Pilha (LIFO - Last In, First Out) genérica em TypeScript.\n\nPasso a passo:\n1. A definição genérica 'class Stack<T>' permite que a pilha funcione com qualquer tipo de dado (números, strings ou objetos personalizados) mantendo a segurança de tipo estático.\n2. O campo privado 'items: T[] = []' armazena internamente os elementos da pilha. Sendo privado, ele impede o acesso ou manipulação direta dos dados de fora da classe, respeitando o encapsulamento.\n3. O método 'push(item: T): void' aceita um elemento e o insere no topo (final do array interno).\n4. O método 'pop(): T | undefined' remove e retorna o elemento no topo (o último adicionado). Se a pilha estiver vazia, ele retorna undefined de forma segura.\n5. O método 'peek(): T | undefined' lê e retorna o elemento no topo sem removê-lo, acessando o índice 'items.length - 1'.",
+  "expectedOutput": "[O resultado seria]:\n- Topo da pilha (peek): 20\n- Removido da pilha (pop): 20\n- Novo topo da pilha (peek): 10"
+}

@@ -1,0 +1,7 @@
+{
+  "difficulty": "hard",
+  "category": "Padrões de Projeto",
+  "comment": "Um decorador simples para medir o tempo de execução de uma função.",
+  "detailedExplanation": "Este exercício demonstra a criação de um Decorador em Python, que permite estender ou interceptar a execução de uma função sem alterar seu código-fonte direto.\n\nPasso a passo:\n1. A assinatura 'def timing_decorator(func)' recebe a função original 'func' como entrada.\n2. A função interna 'def wrapper(*args, **kwargs)' age como interceptador. Ela aceita qualquer assinatura de argumentos de modo dinâmico para repassar à função original.\n3. Capturamos a marca de tempo de início precisa utilizando 'time.perf_counter()'.\n4. Invocamos a função decorada: 'result = func(*args, **kwargs)'.\n5. Calculamos o tempo decorrido no término ('end - start') e imprimimos o resultado no console com o nome da função ('func.__name__').\n6. Retornamos o valor gerado ('result') para garantir que o fluxo de execução de quem chamou a função original permaneça idêntico.",
+  "expectedOutput": "[O resultado seria]:\ntest_sleep_func levou 0.1500s"
+}

@@ -1,0 +1,17 @@
+# Dependências
+node_modules/
+
+# Build e compilação
+dist/
+out/
+
+# Arquivos temporários de prática de digitação
+.practice_session_*
+
+# Arquivos de log e testes do VS Code
+.vscode-test/
+*.log
+
+# Arquivos do sistema operacional
+.DS_Store
+Thumbs.db
