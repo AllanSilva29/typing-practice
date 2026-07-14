@@ -37,9 +37,18 @@ export class GameDecoratorService {
     );
     editor.setDecorations(this.correctDecoration, [correctRange]);
 
-    const errorRanges = errorIndex !== -1 ? [
-      new vscode.Range(positionAt(code, currentIndex), positionAt(code, currentIndex + 1))
-    ] : [];
+    let errorRanges: vscode.Range[] = [];
+    if (errorIndex !== -1) {
+      if (code[errorIndex] === '\n' && errorIndex > 0) {
+        errorRanges = [
+          new vscode.Range(positionAt(code, errorIndex - 1), positionAt(code, errorIndex))
+        ];
+      } else {
+        errorRanges = [
+          new vscode.Range(positionAt(code, errorIndex), positionAt(code, errorIndex + 1))
+        ];
+      }
+    }
     editor.setDecorations(this.errorDecoration, errorRanges);
 
     const startRemainingOffset = errorIndex !== -1 ? currentIndex + 1 : currentIndex;

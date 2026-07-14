@@ -99,7 +99,19 @@ export class GameManager {
       SelectionHandler.enforceCursorPosition(e, this.currentUri, this.currentIndex, this.errorIndex, this.activeSnippet!.code);
     });
 
-    this.disposables.push(selSub);
+    const activeEditorSub = vscode.window.onDidChangeActiveTextEditor((activeEditor) => {
+      if (this.state === 'playing' && activeEditor && this.currentUri && activeEditor.document.uri.toString() === this.currentUri.toString()) {
+        this.refresh(activeEditor);
+      }
+    });
+
+    const docChangeSub = vscode.workspace.onDidChangeTextDocument(async (e) => {
+      if (this.state === 'playing' && this.currentUri && e.document.uri.toString() === this.currentUri.toString()) {
+        await vscode.commands.executeCommand('undo');
+      }
+    });
+
+    this.disposables.push(selSub, activeEditorSub, docChangeSub);
   }
 
   async handleType(character: string): Promise<void> {

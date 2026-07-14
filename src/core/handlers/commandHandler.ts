@@ -39,6 +39,20 @@ export class CommandHandler {
       vscode.window.showInformationMessage('Progresso de digitação resetado.');
     });
 
-    context.subscriptions.push(typeCommand, deleteLeftCommand, stopCommand, resetCommand);
+    const pasteCommand = vscode.commands.registerCommand('paste', async (args) => {
+      if (gameManager.isPlaying) {
+        return;
+      }
+      await vscode.commands.executeCommand('default:paste', args);
+    });
+
+    const cutCommand = vscode.commands.registerCommand('cut', async (args) => {
+      if (gameManager.isPlaying) {
+        return;
+      }
+      await vscode.commands.executeCommand('default:cut', args);
+    });
+
+    context.subscriptions.push(typeCommand, deleteLeftCommand, stopCommand, resetCommand, pasteCommand, cutCommand);
   }
 }
