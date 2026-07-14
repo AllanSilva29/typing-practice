@@ -1,8 +1,8 @@
 {
-  "name": "Métodos em Structs",
+  "name": "Fóssil: Métodos em Structs",
   "difficulty": "easy",
-  "category": "Estruturas de Dados",
-  "comment": "Define um tipo Retângulo e calcula sua área usando um método receiver.",
-  "detailedExplanation": "Este snippet em Go exemplifica a modelagem de dados utilizando structs e a vinculação de métodos por receptor (receiver).\n\nPasso a passo:\n1. O tipo 'Rect' é declarado como uma struct contendo os atributos 'width' (largura) e 'height' (altura) representados por ponto flutuante de 64 bits (float64).\n2. O método 'Area()' retorna a área calculada. Ele define um receptor por valor '(r Rect)'. Isso permite invocar o método em qualquer variável do tipo Rect, como se fosse um método de classe (ex: minhaStruct.Area()).\n3. O método calcula a área acessando os campos do receptor local e os multiplicando: 'r.width * r.height'.",
+  "category": "Estruturas Ancestrais",
+  "comment": "Calculava área de forma rudimentar, sem pedir para a IA 'vibecodar'.",
+  "detailedExplanation": "Na Idade da Pedra lascada, os humanos não usavam Copilot para calcular uma simples área. Eles criavam 'Structs' à mão no teclado, como Neandertais esculpindo rochas.\n\nPasso a passo:\n1. A struct 'Rect' era declarada manualmente para guardar largura e altura, pois não havia prompt que fizesse isso com um clique.\n2. O método receiver 'Area()' vinculava a lógica à estrutura, forçando o programador ancestral a digitar cada caractere.\n3. O cálculo 'r.width * r.height' exigia raciocínio matemático básico direto na CPU humana, antes da ascensão gloriosa do Vibe Coding.",
   "expectedOutput": "[O resultado seria]: Area do retangulo Rect{12.5, 4.0} = 50.00"
 }

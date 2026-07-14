@@ -1,8 +1,8 @@
 {
-  "name": "Promise.all",
+  "name": "Fóssil: Promise.all",
   "difficulty": "medium",
-  "category": "Assincronismo",
-  "comment": "Executa múltiplas promessas em paralelo e aguarda os resultados.",
-  "detailedExplanation": "Este código demonstra o processamento paralelo de requisições assíncronas utilizando Promises em JavaScript com a sintaxe moderna de async/await.\n\nPasso a passo:\n1. A palavra-chave 'async' na assinatura 'async function fetchAllData(urls)' define que a função retorna uma Promise implicitamente e permite o uso de 'await' interno.\n2. A linha 'const promises = urls.map(url => fetch(url).then(res => res.json()))' cria um array de Promises. Cada Promise inicia uma requisição com 'fetch' e encadeia a conversão da resposta para JSON assincronamente.\n3. Usamos 'const results = await Promise.all(promises)'. O 'Promise.all' inicia o processamento concorrente de todas as requisições simultaneamente e o 'await' suspende a execução até que todas sejam resolvidas com sucesso.\n4. O bloco 'try-catch' captura erros: se qualquer Promise falhar (como erro de rede), o catch interrompe a execução, reporta no console e lança a exceção adiante.",
+  "category": "Assincronismo Primitivo",
+  "comment": "Aguardava múltiplas promessas no tempo em que promessas de emprego na área de TI eram reais.",
+  "detailedExplanation": "As chamadas assíncronas concorrentes representavam o ápice tecnológico da era do carbono-14. O dev antigo tentava buscar múltiplas URLs ao mesmo tempo para parecer ocupado no trabalho.\n\nPasso a passo:\n1. 'async' permitia suspender o fluxo no await, como um caçador esperando a presa.\n2. O map gerava promessas paralelas de requisições de rede manuais.\n3. O 'Promise.all' resolvia tudo de uma vez. Se uma falhasse, o dev chorava e o bloco try-catch entrava em ação.",
   "expectedOutput": "[O resultado seria]: [\n  { url: 'https://api.github.com', status: 'mocked_ok' },\n  { url: 'https://api.spacexdata.com', status: 'mocked_ok' }\n]"
 }

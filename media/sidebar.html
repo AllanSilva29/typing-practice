@@ -1,20 +1,22 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="{{cssUri}}" rel="stylesheet">
   <title>Prática de Digitação</title>
 </head>
+
 <body>
   <div class="container">
     <div class="header">
       <h1>Typing Practice</h1>
-      <p>Aprimore sua velocidade de código</p>
+      <p>Lembre de como era digitar seu próprio código antes da IA</p>
     </div>
 
-    <!-- Prática Rápida -->
-    <div class="section-title">Prática Rápida</div>
+    <!-- Simulação de Escrita Manual -->
+    <div class="section-title">Simulação de Escrita Manual</div>
     <div class="control-card">
       <div class="form-group">
         <label for="language-select">Linguagem</label>
@@ -28,12 +30,12 @@
       </div>
 
       <div class="form-group">
-        <label for="difficulty-select">Dificuldade</label>
+        <label for="difficulty-select">Nível de Sofrimento</label>
         <select id="difficulty-select">
           <option value="all">Todas</option>
-          <option value="easy">Fácil</option>
-          <option value="medium">Médio</option>
-          <option value="hard">Difícil</option>
+          <option value="easy">Fácil (Raso)</option>
+          <option value="medium">Médio (Doloroso)</option>
+          <option value="hard">Difícil (Mortal)</option>
         </select>
       </div>
 
@@ -41,13 +43,12 @@
       <button id="stop-btn" class="btn btn-danger" style="display: none;">⏹ Parar prática</button>
     </div>
 
-    <!-- Navegar por Exercícios (Tree View) -->
     <div class="section-title">Navegar por Exercícios</div>
     <div id="tree-container" class="tree-container">
       <div class="no-history">Carregando exercícios...</div>
     </div>
 
-    <!-- Estatísticas Gerais -->
+    <!-- Velocidade do Vibe Coder Ancestral -->
     <div class="section-title">Suas Estatísticas</div>
     <div class="stats-grid">
       <div class="stat-card">
@@ -76,4 +77,5 @@
 
   <script src="{{jsUri}}"></script>
 </body>
+
 </html>
