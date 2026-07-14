@@ -1,5 +1,5 @@
 {
-  "name": "Fóssil: Promise.all",
+  "name": "Promise.all",
   "difficulty": "medium",
   "category": "Assincronismo Primitivo",
   "comment": "Aguardava múltiplas promessas no tempo em que promessas de emprego na área de TI eram reais.",

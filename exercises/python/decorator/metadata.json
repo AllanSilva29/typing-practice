@@ -1,5 +1,5 @@
 {
-  "name": "Fóssil: Decorador de Tempo",
+  "name": "Decorador de Tempo",
   "difficulty": "hard",
   "category": "Padrões Ancestrais",
   "comment": "Cronometrava o tempo de código ruim, antes de a IA fazer código ruim instantaneamente.",
