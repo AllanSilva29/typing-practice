@@ -65,16 +65,18 @@ window.addEventListener('message', event => {
     statAccuracy.textContent = stats.avgAccuracy + '%';
 
     // Atualiza Árvore de Exercícios e Histórico
-    renderTreeView(snippets || []);
+    renderTreeView(snippets || [], history || []);
     renderHistoryList(history || []);
   }
 });
 
-function renderTreeView(snippets) {
+function renderTreeView(snippets, history = []) {
   if (snippets.length === 0) {
     treeContainer.innerHTML = '<div class="no-history">Nenhum exercício carregado.</div>';
     return;
   }
+
+  const completedIds = new Set(history.map(item => item.snippetId));
 
   // Constrói a árvore de diretórios com base na linguagem e no caminho relativo
   const root = { name: '.', type: 'folder', children: {}, relativePath: '' };
@@ -129,7 +131,7 @@ function renderTreeView(snippets) {
         lineHtml += '  <span class="tree-branch">' + currentPrefix + branchChar + '</span>';
         lineHtml += '  <span class="' + folderClass + '" onclick="openFolderMetadata(\'' + child.relativePath + '\')">' + displayName + '</span>';
         lineHtml += '</div>';
-        
+
         html += lineHtml;
 
         const nextPrefixes = [...prefixes, isLast ? '    ' : '│   '];
@@ -137,10 +139,12 @@ function renderTreeView(snippets) {
       } else {
         const s = child.snippet;
         const displayName = s.name;
+        const isCompleted = completedIds.has(s.id);
+        const completedClass = isCompleted ? ' completed' : '';
 
         lineHtml += '<div class="tree-line tree-item-exercise" onclick="revisitSnippet(\'' + s.id + '\')">';
         lineHtml += '  <span class="tree-branch">' + currentPrefix + branchChar + '</span>';
-        lineHtml += '  <span class="tree-item-title">' + displayName + '</span>';
+        lineHtml += '  <span class="tree-item-title' + completedClass + '">' + displayName + '</span>';
         lineHtml += '</div>';
 
         html += lineHtml;
@@ -158,26 +162,40 @@ function renderHistoryList(history) {
     return;
   }
 
-  historyList.innerHTML = history.map(item => {
+  const snippetCounts = {};
+  const attemptNumbers = new Array(history.length);
+
+  for (let i = history.length - 1; i >= 0; i--) {
+    const snippetId = history[i].snippetId;
+    snippetCounts[snippetId] = (snippetCounts[snippetId] || 0) + 1;
+    attemptNumbers[i] = snippetCounts[snippetId];
+  }
+
+  historyList.innerHTML = history.map((item, idx) => {
     const date = new Date(item.timestamp).toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
       hour: '2-digit',
       minute: '2-digit'
     });
+    const attempt = attemptNumbers[idx];
+    const langName = item.language.charAt(0).toUpperCase() + item.language.slice(1).toLowerCase();
     return '<div class="history-item" onclick="revisitSnippet(\'' + item.snippetId + '\')">' +
       '<div class="history-header">' +
-        '<span class="history-lang">' + item.language + '</span>' +
-        '<span class="history-time">' + date + '</span>' +
+      '<span class="history-lang">' + langName + '</span>' +
+      '<span class="history-time">' + date + '</span>' +
       '</div>' +
-      '<div class="history-body">' +
-        '<div class="history-cat">' + item.name + '</div>' +
-        '<div class="history-metrics">' +
-          '<span class="val-success">' + item.ppm + ' PPM</span>' +
-          '<span>' + item.accuracy + '%</span>' +
-        '</div>' +
+      '<div class="history-body" style="align-items: flex-start;">' +
+      '<div class="history-cat" style="display: flex; flex-direction: column; gap: 2px;">' +
+      '<div style="font-weight: 500; color: var(--text-main);">' + item.name + '</div>' +
+      '<div style="opacity: 0.5; font-size: 9px; color: var(--text-muted);">' + attempt + 'x Finished</div>' +
       '</div>' +
-    '</div>';
+      '<div class="history-metrics" style="margin-top: 2px;">' +
+      '<span class="val-success">' + item.ppm + ' PPM</span>' +
+      '<span>' + item.accuracy + '%</span>' +
+      '</div>' +
+      '</div>' +
+      '</div>';
   }).join('');
 }
 

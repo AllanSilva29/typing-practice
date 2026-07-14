@@ -280,6 +280,16 @@ select:focus {
   font-family: "Fira Code", Consolas, "DejaVu Sans Mono", "Liberation Mono", Monaco, "Courier New", monospace;
 }
 
+.tree-item-title.completed {
+  color: var(--success);
+}
+
+.tree-item-title.completed::after {
+  content: " ✓";
+  font-weight: bold;
+  color: var(--success);
+}
+
 .tree-container .badge {
   margin-left: auto;
   font-size: 8px;
