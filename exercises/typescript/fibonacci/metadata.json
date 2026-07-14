@@ -1,4 +1,5 @@
 {
+  "name": "Fibonacci Recursivo",
   "difficulty": "easy",
   "category": "Algoritmos",
   "comment": "Calcula recursivamente o enésimo número da sequência de Fibonacci.",

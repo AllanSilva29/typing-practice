@@ -1,4 +1,5 @@
 {
+  "name": "Tente Novamente",
   "difficulty": "medium",
   "category": "Assincronismo",
   "comment": "Executa múltiplas promessas em paralelo e aguarda os resultados.",

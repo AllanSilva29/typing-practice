@@ -76,55 +76,79 @@ function renderTreeView(snippets) {
     return;
   }
 
-  // Agrupar snippets por linguagem e categoria
-  const grouped = {};
+  // Constrói a árvore de diretórios com base na linguagem e no caminho relativo
+  const root = { name: '.', type: 'folder', children: {}, relativePath: '' };
+
   snippets.forEach(s => {
     const lang = s.language;
-    const cat = s.category;
-    if (!grouped[lang]) grouped[lang] = {};
-    if (!grouped[lang][cat]) grouped[lang][cat] = [];
-    grouped[lang][cat].push(s);
+    if (!root.children[lang]) {
+      root.children[lang] = { name: lang, type: 'folder', children: {}, relativePath: lang };
+    }
+
+    const parts = s.relativePath ? s.relativePath.split('/') : [s.id.split('-').slice(1).join('-')];
+    let current = root.children[lang];
+
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      const isLastPart = i === parts.length - 1;
+
+      if (!current.children[part]) {
+        const childRelativePath = current.relativePath ? current.relativePath + '/' + part : part;
+        current.children[part] = {
+          name: part,
+          type: isLastPart ? 'exercise' : 'folder',
+          children: {},
+          relativePath: childRelativePath
+        };
+        if (isLastPart) {
+          current.children[part].snippet = s;
+        }
+      }
+      current = current.children[part];
+    }
   });
 
-  const languages = Object.keys(grouped);
-  let html = '<div class="tree-line"><span class="tree-folder-lang">.</span></div>';
+  let html = '<div class="tree-line"><span class="tree-folder-lang" onclick="openFolderMetadata(\'\')">.</span></div>';
 
-  languages.forEach((lang, langIdx) => {
-    const isLastLang = langIdx === languages.length - 1;
-    const langChar = isLastLang ? '└── ' : '├── ';
-    const langPrefix = isLastLang ? '    ' : '│   ';
-    const langDisplay = lang.charAt(0).toUpperCase() + lang.slice(1);
+  function renderNode(node, prefixes) {
+    const keys = Object.keys(node.children);
+    keys.forEach((key, index) => {
+      const child = node.children[key];
+      const isLast = index === keys.length - 1;
 
-    html += '<div class="tree-line">';
-    html += '  <span class="tree-branch">' + langChar + '</span>';
-    html += '  <span class="tree-folder-lang">' + langDisplay + '</span>';
-    html += '</div>';
+      const branchChar = isLast ? '└── ' : '├── ';
+      const currentPrefix = prefixes.join('');
 
-    const categories = Object.keys(grouped[lang]);
-    categories.forEach((cat, catIdx) => {
-      const isLastCat = catIdx === categories.length - 1;
-      const catChar = isLastCat ? '└── ' : '├── ';
-      const catPrefix = langPrefix + (isLastCat ? '    ' : '│   ');
+      let lineHtml = '';
+      if (child.type === 'folder') {
+        const isLang = prefixes.length === 0;
+        const folderClass = isLang ? 'tree-folder-lang' : 'tree-folder-cat';
+        const displayName = isLang ? child.name.charAt(0).toUpperCase() + child.name.slice(1) : child.name;
 
-      html += '<div class="tree-line">';
-      html += '  <span class="tree-branch">' + langPrefix + catChar + '</span>';
-      html += '  <span class="tree-folder-cat">' + cat + '</span>';
-      html += '</div>';
+        lineHtml += '<div class="tree-line">';
+        lineHtml += '  <span class="tree-branch">' + currentPrefix + branchChar + '</span>';
+        lineHtml += '  <span class="' + folderClass + '" onclick="openFolderMetadata(\'' + child.relativePath + '\')">' + displayName + '</span>';
+        lineHtml += '</div>';
+        
+        html += lineHtml;
 
-      const exercises = grouped[lang][cat];
-      exercises.forEach((s, sIdx) => {
-        const isLastEx = sIdx === exercises.length - 1;
-        const exChar = isLastEx ? '└── ' : '├── ';
-        const nameDisplay = s.id.split('-').slice(1).join('-').replace(/^[a-z]/, c => c.toUpperCase());
+        const nextPrefixes = [...prefixes, isLast ? '    ' : '│   '];
+        renderNode(child, nextPrefixes);
+      } else {
+        const s = child.snippet;
+        const displayName = s.name;
 
-        html += '<div class="tree-line tree-item-exercise" onclick="revisitSnippet(\'' + s.id + '\')">';
-        html += '  <span class="tree-branch">' + catPrefix + exChar + '</span>';
-        html += '  <span class="tree-item-title">' + nameDisplay + '</span>';
-        html += '</div>';
-      });
+        lineHtml += '<div class="tree-line tree-item-exercise" onclick="revisitSnippet(\'' + s.id + '\')">';
+        lineHtml += '  <span class="tree-branch">' + currentPrefix + branchChar + '</span>';
+        lineHtml += '  <span class="tree-item-title">' + displayName + '</span>';
+        lineHtml += '</div>';
+
+        html += lineHtml;
+      }
     });
-  });
+  }
 
+  renderNode(root, []);
   treeContainer.innerHTML = html;
 }
 
@@ -147,7 +171,7 @@ function renderHistoryList(history) {
         '<span class="history-time">' + date + '</span>' +
       '</div>' +
       '<div class="history-body">' +
-        '<div class="history-cat">' + item.category + '</div>' +
+        '<div class="history-cat">' + item.name + '</div>' +
         '<div class="history-metrics">' +
           '<span class="val-success">' + item.ppm + ' PPM</span>' +
           '<span>' + item.accuracy + '%</span>' +
@@ -159,4 +183,8 @@ function renderHistoryList(history) {
 
 function revisitSnippet(snippetId) {
   vscode.postMessage({ type: 'revisitSnippet', snippetId });
+}
+
+function openFolderMetadata(relativePath) {
+  vscode.postMessage({ type: 'openFolderMetadata', relativePath });
 }

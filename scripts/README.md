@@ -31,6 +31,7 @@ Para que o exercício seja importado, o arquivo Markdown deve seguir exatamente 
 
 ```markdown
 ---
+name: Busca Binária
 language: python
 id: binary-search
 difficulty: easy
@@ -62,6 +63,7 @@ def binary_search(arr, target):
 1. **Bloco de Metadados (Frontmatter):**
    - Deve ser delimitado por exatamente `---` no início e fim.
    - Contém pares `chave: valor` com as seguintes chaves obrigatórias:
+     - `name`: Nome legível do exercício. Ex: `Busca Binária`.
      - `language`: Linguagem de programação correspondente (ex: `python`, `javascript`, `go`, `typescript`).
      - `id`: Identificador único do exercício em formato `kebab-case` (letras minúsculas e hífens). Ex: `binary-search`.
      - `difficulty`: Deve ser estritamente `easy`, `medium` ou `hard`.

@@ -1,4 +1,5 @@
 {
+  "name": "Métodos em Structs",
   "difficulty": "easy",
   "category": "Estruturas de Dados",
   "comment": "Define um tipo Retângulo e calcula sua área usando um método receiver.",

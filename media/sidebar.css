@@ -233,12 +233,26 @@ select:focus {
   color: var(--text-main);
   font-weight: 600;
   font-family: "Fira Code", Consolas, "DejaVu Sans Mono", "Liberation Mono", Monaco, "Courier New", monospace;
+  cursor: pointer;
+  transition: color 0.1s;
+}
+
+.tree-folder-lang:hover {
+  color: var(--accent-light);
+  text-decoration: underline;
 }
 
 .tree-folder-cat {
   color: var(--accent-light);
   font-weight: 500;
   font-family: "Fira Code", Consolas, "DejaVu Sans Mono", "Liberation Mono", Monaco, "Courier New", monospace;
+  cursor: pointer;
+  transition: color 0.1s;
+}
+
+.tree-folder-cat:hover {
+  color: var(--text-main);
+  text-decoration: underline;
 }
 
 .tree-item-exercise {

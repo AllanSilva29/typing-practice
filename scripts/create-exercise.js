@@ -115,7 +115,7 @@ function parseFrontmatter(str) {
 }
 
 function validateMetadata(metadata) {
-  const required = ['language', 'id', 'difficulty', 'category', 'comment'];
+  const required = ['language', 'id', 'difficulty', 'category', 'comment', 'name'];
   for (const field of required) {
     if (!metadata[field]) {
       throw new Error(`O campo obrigatório "${field}" está ausente no cabeçalho.`);
@@ -219,6 +219,7 @@ function writeExerciseFiles(exercise) {
   }
 
   const metadataJson = {
+    name: exercise.name,
     difficulty: exercise.difficulty,
     category: exercise.category,
     comment: exercise.comment,

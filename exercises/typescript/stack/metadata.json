@@ -1,4 +1,5 @@
 {
+  "name": "Pilha Genérica",
   "difficulty": "medium",
   "category": "Estruturas de Dados",
   "comment": "Implementação simples de uma estrutura de dados de Pilha genérica.",

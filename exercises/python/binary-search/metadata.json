@@ -1,4 +1,5 @@
 {
+  "name": "Busca Binária",
   "difficulty": "medium",
   "category": "Algoritmos",
   "comment": "Realiza busca binária iterativa em uma lista ordenada.",

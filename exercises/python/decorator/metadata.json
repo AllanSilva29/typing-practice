@@ -1,4 +1,5 @@
 {
+  "name": "Decorador de Tempo de Execução",
   "difficulty": "hard",
   "category": "Padrões de Projeto",
   "comment": "Um decorador simples para medir o tempo de execução de uma função.",

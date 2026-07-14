@@ -11,7 +11,10 @@
       "outFiles": [
         "${workspaceFolder}/dist/**/*.js"
       ],
-      "preLaunchTask": "npm: build"
+      "preLaunchTask": "npm: build",
+      "env": {
+        "NODE_OPTIONS": "--no-deprecation"
+      }
     }
   ]
 }
