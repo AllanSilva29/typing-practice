@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { findSnippetById } from '../snippetDatabase';
+import { SnippetService } from './snippetService';
 
 export interface GameRecord {
   ppm: number;
@@ -9,6 +9,7 @@ export interface GameRecord {
 }
 
 export interface FormattedRecord extends GameRecord {
+  name: string;
   category: string;
   language: string;
   comment: string;
@@ -24,51 +25,68 @@ export interface ProgressState {
   history: FormattedRecord[];
 }
 
-export async function addRecord(
-  context: vscode.ExtensionContext,
-  record: { ppm: number; accuracy: number; snippetId: string }
-): Promise<void> {
-  const history: GameRecord[] = context.globalState.get('history') || [];
-  history.push({
-    ...record,
-    timestamp: Date.now()
-  });
-  await context.globalState.update('history', history);
-}
+export class ProgressService {
+  private static instance: ProgressService;
 
-export async function clearProgress(context: vscode.ExtensionContext): Promise<void> {
-  await context.globalState.update('history', []);
-}
+  private constructor(private readonly context: vscode.ExtensionContext) {}
 
-export function getProgressState(context: vscode.ExtensionContext, isPlaying: boolean): ProgressState {
-  const history: GameRecord[] = context.globalState.get('history') || [];
-  const totalCompleted = history.length;
+  public static initialize(context: vscode.ExtensionContext): ProgressService {
+    ProgressService.instance = new ProgressService(context);
+    return ProgressService.instance;
+  }
 
-  const avgPpm = totalCompleted > 0
-    ? Math.round(history.reduce((sum, item) => sum + item.ppm, 0) / totalCompleted)
-    : 0;
+  public static getInstance(): ProgressService {
+    if (!ProgressService.instance) {
+      throw new Error('ProgressService não foi inicializado. Chame ProgressService.initialize(context) primeiro.');
+    }
+    return ProgressService.instance;
+  }
 
-  const avgAccuracy = totalCompleted > 0
-    ? Math.round(history.reduce((sum, item) => sum + item.accuracy, 0) / totalCompleted)
-    : 0;
+  public async addRecord(record: { ppm: number; accuracy: number; snippetId: string }): Promise<void> {
+    const history: GameRecord[] = this.context.globalState.get('history') || [];
+    history.push({
+      ...record,
+      timestamp: Date.now()
+    });
+    await this.context.globalState.update('history', history);
+  }
 
-  const formattedHistory = history.map((h) => {
-    const snippet = findSnippetById(h.snippetId);
+  public async clearProgress(): Promise<void> {
+    await this.context.globalState.update('history', []);
+  }
+
+  public getProgressState(isPlaying: boolean): ProgressState {
+    const history: GameRecord[] = this.context.globalState.get('history') || [];
+    const totalCompleted = history.length;
+
+    const avgPpm = totalCompleted > 0
+      ? Math.round(history.reduce((sum, item) => sum + item.ppm, 0) / totalCompleted)
+      : 0;
+
+    const avgAccuracy = totalCompleted > 0
+      ? Math.round(history.reduce((sum, item) => sum + item.accuracy, 0) / totalCompleted)
+      : 0;
+
+    const snippetDb = SnippetService.getInstance();
+    const formattedHistory = history.map((h) => {
+      const snippet = snippetDb.findSnippetById(h.snippetId);
+      return {
+        ...h,
+        name: snippet?.name || 'Desconhecido',
+        category: snippet?.category || 'Desconhecido',
+        language: snippet?.language || 'Desconhecida',
+        comment: snippet?.comment || ''
+      };
+    }).reverse();
+
     return {
-      ...h,
-      category: snippet?.category || 'Desconhecido',
-      language: snippet?.language || 'Desconhecida',
-      comment: snippet?.comment || ''
+      isPlaying,
+      stats: {
+        totalCompleted,
+        avgPpm,
+        avgAccuracy
+      },
+      history: formattedHistory
     };
-  }).reverse();
-
-  return {
-    isPlaying,
-    stats: {
-      totalCompleted,
-      avgPpm,
-      avgAccuracy
-    },
-    history: formattedHistory
-  };
+  }
 }

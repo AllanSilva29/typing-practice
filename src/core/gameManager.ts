@@ -1,11 +1,12 @@
 import * as vscode from 'vscode';
-import { Snippet, getSnippets } from './snippetDatabase';
-import { AISuggestionSuppressor } from './aiSuggestionSuppressor';
+import { Snippet, SnippetService } from './services/snippetService';
+import { AISuggestionService } from './services/aiSuggestionService';
 import { skipWhitespace } from './utils';
-import { CodeExecutor } from './codeExecutor';
-import { GameDecorator } from './gameDecorator';
-import { writeTempFile, deleteTempFile, closeEditorIfOpen } from './handlers/fileHandler';
-import { enforceCursorPosition } from './handlers/selectionHandler';
+import { CodeExecutionService } from './services/codeExecutionService';
+import { GameDecoratorService } from './services/gameDecoratorService';
+import { FileHandler } from './handlers/fileHandler';
+import { SelectionHandler } from './handlers/selectionHandler';
+import { MetricsTrackerService } from './services/metricsTrackerService';
 
 export class GameManager {
   private activeSnippet: Snippet | null = null;
@@ -13,15 +14,12 @@ export class GameManager {
   private currentIndex: number = 0;
   private errorIndex: number = -1;
   private history: number[] = [];
-  
-  private startTime: number = 0;
-  private totalKeystrokes: number = 0;
-  private correctKeystrokes: number = 0;
-  
+
   private state: 'idle' | 'playing' | 'completed' = 'idle';
-  private suppressor = new AISuggestionSuppressor();
-  private executor = new CodeExecutor();
-  private decorator = new GameDecorator();
+  private suppressor = new AISuggestionService();
+  private executor = new CodeExecutionService();
+  private decorator = new GameDecoratorService();
+  private metrics = new MetricsTrackerService();
   private disposables: vscode.Disposable[] = [];
   private statusBarItem: vscode.StatusBarItem = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Left,
@@ -34,7 +32,7 @@ export class GameManager {
   registerCallbacks(
     onComplete: (stats: { ppm: number; accuracy: number; snippetId: string }) => void,
     onStop: () => void
-  ) {
+  ): void {
     this.onCompleteCallback = onComplete;
     this.onStopCallback = onStop;
   }
@@ -47,13 +45,19 @@ export class GameManager {
     return this.state === 'completed';
   }
 
-  async start(snippet: Snippet) {
+  async start(snippet: Snippet): Promise<void> {
     if (this.state !== 'idle') {
       await this.stop(false);
     }
 
     this.initializeState(snippet);
     await this.suppressor.suppress();
+
+    try {
+      const uri = vscode.Uri.parse(`typing-practice-metadata:/${snippet.language}/${snippet.relativePath}`);
+      await vscode.commands.executeCommand('markdown.showPreview', uri, vscode.ViewColumn.Two);
+    } catch {
+    }
 
     const editor = await this.prepareEditor(snippet);
     if (!editor) return;
@@ -63,55 +67,42 @@ export class GameManager {
     this.executor.showExplanation(snippet.id);
 
     const difficultyLabel = snippet.difficulty.toUpperCase();
-    this.statusBarItem.text = `$(keyboard) Praticando: ${snippet.category} - ${snippet.id} (${difficultyLabel})`;
+    this.statusBarItem.text = `$(keyboard) Praticando: ${snippet.name} (${difficultyLabel})`;
     this.statusBarItem.tooltip = `Prática de Digitação: ${snippet.comment}`;
     this.statusBarItem.show();
   }
 
-  private initializeState(snippet: Snippet) {
+  private initializeState(snippet: Snippet): void {
     this.activeSnippet = snippet;
     this.state = 'playing';
     this.currentIndex = 0;
     this.errorIndex = -1;
     this.history = [];
-    this.startTime = Date.now();
-    this.totalKeystrokes = 0;
-    this.correctKeystrokes = 0;
+    this.metrics.start();
   }
 
   private async prepareEditor(snippet: Snippet): Promise<vscode.TextEditor | null> {
-    const workspaceFolders = vscode.workspace.workspaceFolders;
-    if (!workspaceFolders || workspaceFolders.length === 0) {
-      vscode.window.showErrorMessage('Abra uma pasta no VS Code para iniciar a prática.');
+    const result = await FileHandler.setupPracticeDocument(snippet);
+    if (!result) {
       this.state = 'idle';
       return null;
     }
 
-    const rootPath = workspaceFolders[0].uri.fsPath;
-    const normalizedCode = snippet.code.replace(/\r\n/g, '\n');
-    this.activeSnippet!.code = normalizedCode;
-
-    this.currentIndex = skipWhitespace(normalizedCode, this.currentIndex);
-
-    const fileUri = await writeTempFile(rootPath, snippet.language, normalizedCode);
-    this.currentUri = fileUri;
-
-    const document = await vscode.workspace.openTextDocument(fileUri);
-    const editor = await vscode.window.showTextDocument(document, vscode.ViewColumn.One, false);
-
-    return editor;
+    this.currentUri = result.uri;
+    this.currentIndex = skipWhitespace(snippet.code, this.currentIndex);
+    return result.editor;
   }
 
-  private registerGameListeners(editor: vscode.TextEditor) {
+  private registerGameListeners(editor: vscode.TextEditor): void {
     const selSub = vscode.window.onDidChangeTextEditorSelection((e) => {
       if (this.state !== 'playing') return;
-      enforceCursorPosition(e, this.currentUri, this.currentIndex, this.errorIndex, this.activeSnippet!.code);
+      SelectionHandler.enforceCursorPosition(e, this.currentUri, this.currentIndex, this.errorIndex, this.activeSnippet!.code);
     });
 
     this.disposables.push(selSub);
   }
 
-  async handleType(character: string) {
+  async handleType(character: string): Promise<void> {
     if (this.state === 'completed') {
       if (character === '\n') {
         await this.navigateToNextOrPrev(true);
@@ -132,18 +123,16 @@ export class GameManager {
     const code = this.activeSnippet.code;
     const targetChar = code[this.currentIndex];
 
-    this.totalKeystrokes++;
-
     const isCorrectChar = character === targetChar || (targetChar === '\n' && character === '\n');
-    const isError = this.errorIndex !== -1 || !isCorrectChar;
+    this.metrics.recordKeystroke(isCorrectChar);
 
+    const isError = this.errorIndex !== -1 || !isCorrectChar;
     if (isError) {
       this.errorIndex = this.errorIndex === -1 ? this.currentIndex : this.errorIndex;
       this.refresh(editor);
       return;
     }
 
-    this.correctKeystrokes++;
     this.history.push(this.currentIndex);
     this.currentIndex++;
 
@@ -159,7 +148,7 @@ export class GameManager {
     this.refresh(editor);
   }
 
-  async handleBackspace() {
+  async handleBackspace(): Promise<void> {
     if (this.state === 'completed') {
       await this.navigateToNextOrPrev(false);
       return;
@@ -180,18 +169,17 @@ export class GameManager {
     }
 
     this.currentIndex = this.history.pop() ?? this.currentIndex;
-
     this.refresh(editor);
   }
 
-  private refresh(editor: vscode.TextEditor) {
+  private refresh(editor: vscode.TextEditor): void {
     const code = this.activeSnippet!.code;
     this.decorator.update(editor, code, this.currentIndex, this.errorIndex);
     this.decorator.syncCursor(editor, code, this.currentIndex, this.errorIndex);
   }
 
-  private async completeGame() {
-    const { ppm, accuracy } = this.calculateMetrics();
+  private async completeGame(): Promise<void> {
+    const { ppm, accuracy } = this.metrics.calculate();
     const snippetId = this.activeSnippet!.id;
 
     this.state = 'completed';
@@ -212,25 +200,22 @@ export class GameManager {
     }
   }
 
-  private async navigateToNextOrPrev(isNext: boolean) {
+  private async navigateToNextOrPrev(isNext: boolean): Promise<void> {
     if (!this.activeSnippet) return;
 
-    const snippets = getSnippets();
+    const snippets = SnippetService.getInstance().getSnippets();
     const currentIndex = snippets.findIndex(s => s.id === this.activeSnippet!.id);
     if (currentIndex === -1) return;
 
-    let targetSnippet: Snippet;
-    if (isNext) {
-      targetSnippet = snippets[(currentIndex + 1) % snippets.length];
-    } else {
-      targetSnippet = snippets[(currentIndex - 1 + snippets.length) % snippets.length];
-    }
+    const targetSnippet = isNext
+      ? snippets[(currentIndex + 1) % snippets.length]
+      : snippets[(currentIndex - 1 + snippets.length) % snippets.length];
 
     const tempUri = this.currentUri;
     this.state = 'idle';
     if (tempUri) {
-      await closeEditorIfOpen(tempUri);
-      await deleteTempFile(tempUri);
+      await FileHandler.closeEditorIfOpen(tempUri);
+      await FileHandler.deleteTempFile(tempUri);
       this.currentUri = null;
     }
     this.activeSnippet = null;
@@ -238,34 +223,23 @@ export class GameManager {
     await this.start(targetSnippet);
   }
 
-  private calculateMetrics(): { ppm: number; accuracy: number } {
-    const durationMs = Date.now() - this.startTime;
-    const minutes = durationMs / 60000;
-    
-    const ppm = minutes > 0 ? Math.round((this.correctKeystrokes / 5) / minutes) : 0;
-    const accuracy = this.totalKeystrokes > 0 ? Math.round((this.correctKeystrokes / this.totalKeystrokes) * 100) : 100;
-
-    return { ppm, accuracy };
-  }
-
-  async stop(completed: boolean = false) {
+  async stop(completed: boolean = false): Promise<void> {
     if (this.state === 'idle') return;
 
     this.state = 'idle';
-    
+
     this.disposables.forEach((d) => d.dispose());
     this.disposables = [];
 
     await this.suppressor.restore();
 
     if (this.currentUri) {
-      await closeEditorIfOpen(this.currentUri);
-      await deleteTempFile(this.currentUri);
+      await FileHandler.closeEditorIfOpen(this.currentUri);
+      await FileHandler.deleteTempFile(this.currentUri);
       this.currentUri = null;
     }
 
     this.activeSnippet = null;
-
     this.statusBarItem.hide();
 
     if (!completed && this.onStopCallback) {
@@ -273,38 +247,7 @@ export class GameManager {
     }
   }
 
-  async fallbackBackspace() {
-    const editor = vscode.window.activeTextEditor;
-    if (!editor) return;
-
-    const selection = editor.selection;
-    if (selection.isEmpty) {
-      const position = selection.active;
-      if (position.character > 0) {
-        const range = new vscode.Range(position.translate(0, -1), position);
-        await editor.edit(editBuilder => {
-          editBuilder.delete(range);
-        });
-      } else if (position.line > 0) {
-        const previousLineLength = editor.document.lineAt(position.line - 1).text.length;
-        const range = new vscode.Range(
-          new vscode.Position(position.line - 1, previousLineLength),
-          position
-        );
-        await editor.edit(editBuilder => {
-          editBuilder.delete(range);
-        });
-      }
-    } else {
-      await editor.edit(editBuilder => {
-        editBuilder.delete(selection);
-      });
-    }
-  }
-
-  dispose() {
+  dispose(): void {
     this.statusBarItem.dispose();
   }
 }
-
-

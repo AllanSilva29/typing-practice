@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { Snippet, findSnippetById, getSnippets } from '../core/snippetDatabase';
+import { Snippet, SnippetService } from '../core/services/snippetService';
 import { GameManager } from '../core/gameManager';
-import { addRecord, getProgressState, clearProgress } from '../core/services/progressService';
+import { ProgressService } from '../core/services/progressService';
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = 'typingPractice.sidebar';
@@ -24,7 +24,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     webviewView: vscode.WebviewView,
     context: vscode.WebviewViewResolveContext,
     _token: vscode.CancellationToken
-  ) {
+  ): void {
     this._view = webviewView;
 
     webviewView.webview.options = {
@@ -76,13 +76,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           );
           if (confirm !== 'Sim, resetar') break;
           
-          await clearProgress(this._context);
+          await ProgressService.getInstance().clearProgress();
           this.sendStateToWebview();
           vscode.window.showInformationMessage('Progresso de digitação resetado com sucesso.');
           break;
         }
         case 'revisitSnippet': {
-          const snippet = findSnippetById(data.snippetId);
+          const snippet = SnippetService.getInstance().findSnippetById(data.snippetId);
           if (!snippet) {
             vscode.window.showErrorMessage('Snippet não encontrado no banco de dados.');
             break;
@@ -91,14 +91,37 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           this.sendStateToWebview();
           break;
         }
+        case 'openFolderMetadata': {
+          const { relativePath } = data;
+          await this.openFolderMetadataMarkdown(relativePath);
+          break;
+        }
       }
     });
 
     this.sendStateToWebview();
   }
 
+  private async openFolderMetadataMarkdown(relativePath: string): Promise<void> {
+    const exercisesPath = path.join(this._context.extensionPath, 'exercises');
+    const folderPath = path.join(exercisesPath, relativePath);
+    const metadataFile = path.join(folderPath, 'metadata.json');
+
+    if (!fs.existsSync(metadataFile)) {
+      vscode.window.showWarningMessage(`Nenhum arquivo metadata.json encontrado em: ${relativePath || 'exercises'}`);
+      return;
+    }
+
+    try {
+      const uri = vscode.Uri.parse(`typing-practice-metadata:/${relativePath}`);
+      await vscode.commands.executeCommand('markdown.showPreview', uri);
+    } catch (err: any) {
+      vscode.window.showErrorMessage(`Erro ao abrir metadata da pasta: ${err.message}`);
+    }
+  }
+
   private getRandomSnippet(language: string, difficulty: string): Snippet | null {
-    const filtered = getSnippets().filter((s) => 
+    const filtered = SnippetService.getInstance().getSnippets().filter((s) => 
       (language === 'all' || s.language.toLowerCase() === language.toLowerCase()) &&
       (difficulty === 'all' || s.difficulty.toLowerCase() === difficulty.toLowerCase())
     );
@@ -108,25 +131,24 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     return filtered[randomIndex];
   }
 
-  private async handleGameComplete(stats: { ppm: number; accuracy: number; snippetId: string }) {
-    await addRecord(this._context, stats);
+  private async handleGameComplete(stats: { ppm: number; accuracy: number; snippetId: string }): Promise<void> {
+    await ProgressService.getInstance().addRecord(stats);
     vscode.window.showInformationMessage(`Snippet concluído! PPM: ${stats.ppm} | Precisão: ${stats.accuracy}%`);
     this.sendStateToWebview();
   }
 
-  private handleGameStop() {
+  private handleGameStop(): void {
     this.sendStateToWebview();
   }
 
-  private sendStateToWebview() {
+  private sendStateToWebview(): void {
     if (!this._view) return;
     const isPlaying = this._gameManager.isPlaying;
-    const progressState = getProgressState(this._context, isPlaying);
+    const progressState = ProgressService.getInstance().getProgressState(isPlaying);
     this._view.webview.postMessage({
       type: 'updateState',
       ...progressState,
-      snippets: getSnippets()
+      snippets: SnippetService.getInstance().getSnippets()
     });
   }
 }
-

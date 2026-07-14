@@ -7,7 +7,7 @@ interface TemporarySetting {
   originalValue?: any;
 }
 
-export class AISuggestionSuppressor {
+export class AISuggestionService {
   private settings: TemporarySetting[] = [
     { section: 'github.copilot', key: 'enable', suppressValue: { '*': false } },
     { section: 'tabnine', key: 'experimental.inline', suppressValue: false },
@@ -34,27 +34,27 @@ export class AISuggestionSuppressor {
     { section: 'typescript', key: 'validate.enable', suppressValue: false }
   ];
 
-  async suppress(): Promise<void> {
+  public async suppress(): Promise<void> {
     for (const setting of this.settings) {
       const config = vscode.workspace.getConfiguration(setting.section);
       const inspect = config.inspect(setting.key);
-      
+
       setting.originalValue = inspect?.globalValue !== undefined ? inspect.globalValue : inspect?.workspaceValue;
-      
+
       try {
         await config.update(setting.key, setting.suppressValue, vscode.ConfigurationTarget.Global);
-      } catch (err) {
+      } catch {
       }
     }
   }
 
-  async restore(): Promise<void> {
+  public async restore(): Promise<void> {
     for (const setting of this.settings) {
       const config = vscode.workspace.getConfiguration(setting.section);
       try {
         const valueToSet = setting.originalValue === undefined ? undefined : setting.originalValue;
         await config.update(setting.key, valueToSet, vscode.ConfigurationTarget.Global);
-      } catch (err) {
+      } catch {
       }
     }
   }

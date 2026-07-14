@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
-import { positionAt } from './utils';
+import { positionAt } from '../utils';
 
-export class GameDecorator {
+export class GameDecoratorService {
   private correctDecoration: vscode.TextEditorDecorationType;
   private errorDecoration: vscode.TextEditorDecorationType;
   private remainingDecoration: vscode.TextEditorDecorationType;
@@ -23,13 +23,13 @@ export class GameDecorator {
     });
   }
 
-  clear(editor: vscode.TextEditor) {
+  public clear(editor: vscode.TextEditor): void {
     editor.setDecorations(this.correctDecoration, []);
     editor.setDecorations(this.errorDecoration, []);
     editor.setDecorations(this.remainingDecoration, []);
   }
 
-  update(editor: vscode.TextEditor, code: string, currentIndex: number, errorIndex: number) {
+  public update(editor: vscode.TextEditor, code: string, currentIndex: number, errorIndex: number): void {
     const endCorrectOffset = errorIndex !== -1 ? currentIndex : currentIndex;
     const correctRange = new vscode.Range(
       new vscode.Position(0, 0),
@@ -50,7 +50,7 @@ export class GameDecorator {
     editor.setDecorations(this.remainingDecoration, [remainingRange]);
   }
 
-  syncCursor(editor: vscode.TextEditor, code: string, currentIndex: number, errorIndex: number) {
+  public syncCursor(editor: vscode.TextEditor, code: string, currentIndex: number, errorIndex: number): void {
     const targetOffset = errorIndex !== -1 ? currentIndex : currentIndex;
     const targetPosition = positionAt(code, targetOffset);
     editor.selection = new vscode.Selection(targetPosition, targetPosition);
