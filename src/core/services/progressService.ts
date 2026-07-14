@@ -18,7 +18,7 @@ export interface FormattedRecord extends GameRecord {
 export interface ProgressState {
   isPlaying: boolean;
   stats: {
-    totalCompleted: number;
+    totalCompleted: string;
     avgPpm: number;
     avgAccuracy: number;
   };
@@ -57,17 +57,29 @@ export class ProgressService {
 
   public getProgressState(isPlaying: boolean): ProgressState {
     const history: GameRecord[] = this.context.globalState.get('history') || [];
-    const totalCompleted = history.length;
+    const totalRuns = history.length;
 
-    const avgPpm = totalCompleted > 0
-      ? Math.round(history.reduce((sum, item) => sum + item.ppm, 0) / totalCompleted)
+    const avgPpm = totalRuns > 0
+      ? Math.round(history.reduce((sum, item) => sum + item.ppm, 0) / totalRuns)
       : 0;
 
-    const avgAccuracy = totalCompleted > 0
-      ? Math.round(history.reduce((sum, item) => sum + item.accuracy, 0) / totalCompleted)
+    const avgAccuracy = totalRuns > 0
+      ? Math.round(history.reduce((sum, item) => sum + item.accuracy, 0) / totalRuns)
       : 0;
 
     const snippetDb = SnippetService.getInstance();
+    const allSnippets = snippetDb.getSnippets();
+    const totalExercises = allSnippets.length;
+
+    // Filtra apenas IDs de snippets únicos que de fato existem na base atual
+    const uniqueCompleted = new Set(
+      history
+        .map(h => h.snippetId)
+        .filter(id => allSnippets.some(s => s.id === id))
+    ).size;
+    
+    const totalCompletedLabel = `${uniqueCompleted}/${totalExercises}`;
+
     const formattedHistory = history.map((h) => {
       const snippet = snippetDb.findSnippetById(h.snippetId);
       return {
@@ -82,7 +94,7 @@ export class ProgressService {
     return {
       isPlaying,
       stats: {
-        totalCompleted,
+        totalCompleted: totalCompletedLabel,
         avgPpm,
         avgAccuracy
       },
