@@ -57,3 +57,41 @@ Este arquivo deve conter **apenas** o código puro do snippet que o usuário dev
 * **Nome do Arquivo:** O arquivo deve obrigatoriamente iniciar com `code.` (ex: `code.ts`, `code.js`, `code.py`, `code.go`, `code.java`).
 * **Sintaxe Limpa:** Escreva o código normalmente. Aproveite o highlight de sintaxe e o linter nativo do VS Code enquanto você o edita.
 * **Espaços e Indentação:** A extensão suporta qualquer tipo de indentação. Se o seu snippet inicia com recuos, o cursor saltará automaticamente para a primeira posição de caractere válido na inicialização do teste.
+
+---
+
+## 3. Ordenação Personalizada (Opcional)
+
+Por padrão, a extensão carrega as pastas e exercícios em ordem alfabética. Caso queira definir uma ordem específica de exibição para as categorias, módulos ou exercícios, você pode criar um arquivo `metadata.json` na **pasta pai** contendo a propriedade `"order"` com a lista de pastas filhas na ordem desejada.
+
+### Estrutura Visual:
+```text
+exercises/
+  └── go/
+      ├── metadata.json       <-- [OPCIONAL] Ordena os módulos (ex: ["module-1", "module-2"])
+      ├── module-1/
+      │   ├── metadata.json   <-- [OPCIONAL] Ordena os exercícios (ex: ["hello-world", "variables"])
+      │   ├── hello-world/
+      │   │   ├── metadata.json
+      │   │   └── code.go
+      │   └── variables/
+      │       ├── metadata.json
+      │       └── code.go
+      └── module-2/
+          ...
+```
+
+### Exemplo de `metadata.json` de Pasta Pai:
+```json
+{
+  "order": [
+    "hello-world",
+    "variables",
+    "constants"
+  ]
+}
+```
+
+### Regras de Ordenação:
+* **`order`**: Array de strings com os nomes exatos das subpastas imediatas na sequência em que devem aparecer.
+* Subpastas que **não** forem listadas no array `"order"` serão enviadas para o fim da lista e ordenadas alfabeticamente.

@@ -35,52 +35,48 @@ export class SnippetService {
 
     const snippets: Snippet[] = [];
     try {
-      const languages = fs.readdirSync(exercisesPath);
+      const exercisePaths = this.getSortedExercisePaths(exercisesPath);
 
-      for (const lang of languages) {
-        const langPath = path.join(exercisesPath, lang);
-        if (!fs.statSync(langPath).isDirectory()) continue;
+      for (const exercisePath of exercisePaths) {
+        const metadataFile = path.join(exercisePath, 'metadata.json');
+        if (!fs.existsSync(metadataFile)) continue;
 
-        const exercisePaths = this.findExerciseDirs(langPath);
-
-        for (const exercisePath of exercisePaths) {
-          const metadataFile = path.join(exercisePath, 'metadata.json');
-          if (!fs.existsSync(metadataFile)) continue;
-
-          try {
-            const metadata = JSON.parse(fs.readFileSync(metadataFile, 'utf-8'));
-            if (!metadata ||
-              typeof metadata.name !== 'string' || metadata.name.trim() === '' ||
-              typeof metadata.category !== 'string' || metadata.category.trim() === '' ||
-              typeof metadata.comment !== 'string' || metadata.comment.trim() === '') {
-              continue;
-            }
-
-            const files = fs.readdirSync(exercisePath);
-            const codeFile = files.find((f) => f.startsWith('code.'));
-            if (!codeFile) continue;
-
-            const codeContent = fs.readFileSync(path.join(exercisePath, codeFile), 'utf-8');
-
-            const relativePath = path.relative(langPath, exercisePath);
-            const normalizedPath = relativePath.replace(/\\/g, '/');
-            const exerciseId = normalizedPath.replace(/\//g, '-');
-
-            snippets.push({
-              id: `${lang}-${exerciseId}`,
-              name: metadata.name,
-              code: codeContent.trim(),
-              comment: metadata.comment,
-              language: lang,
-              difficulty: metadata.difficulty || 'easy',
-              category: metadata.category,
-              detailedExplanation: metadata.detailedExplanation || '',
-              expectedOutput: metadata.expectedOutput || '',
-              relativePath: normalizedPath
-            });
-          } catch (err) {
-            console.error(`Erro ao carregar exercício em ${exercisePath}:`, err);
+        try {
+          const metadata = JSON.parse(fs.readFileSync(metadataFile, 'utf-8'));
+          if (!metadata ||
+            typeof metadata.name !== 'string' || metadata.name.trim() === '' ||
+            typeof metadata.category !== 'string' || metadata.category.trim() === '' ||
+            typeof metadata.comment !== 'string' || metadata.comment.trim() === '') {
+            continue;
           }
+
+          const files = fs.readdirSync(exercisePath);
+          const codeFile = files.find((f) => f.startsWith('code.'));
+          if (!codeFile) continue;
+
+          const codeContent = fs.readFileSync(path.join(exercisePath, codeFile), 'utf-8');
+
+          const relativeToExercises = path.relative(exercisesPath, exercisePath);
+          const parts = relativeToExercises.split(path.sep);
+          const lang = parts[0];
+
+          const relativeToLang = parts.slice(1).join('/');
+          const exerciseId = relativeToLang.replace(/\//g, '-');
+
+          snippets.push({
+            id: `${lang}-${exerciseId}`,
+            name: metadata.name,
+            code: codeContent.trim(),
+            comment: metadata.comment,
+            language: lang,
+            difficulty: metadata.difficulty || 'easy',
+            category: metadata.category,
+            detailedExplanation: metadata.detailedExplanation || '',
+            expectedOutput: metadata.expectedOutput || '',
+            relativePath: relativeToLang
+          });
+        } catch (err) {
+          console.error(`Erro ao carregar exercício em ${exercisePath}:`, err);
         }
       }
     } catch (err) {
@@ -99,48 +95,79 @@ export class SnippetService {
     return this.loadedSnippets.find((s) => s.id === id);
   }
 
-  private findExerciseDirs(dirPath: string): string[] {
-    const exerciseDirs: string[] = [];
+  private getSortedExercisePaths(dirPath: string): string[] {
+    let files: string[];
+    try {
+      files = fs.readdirSync(dirPath);
+    } catch {
+      return [];
+    }
 
-    const traverse = (currentPath: string): void => {
-      let files: string[];
+    const hasMetadata = files.includes('metadata.json');
+    const hasCode = files.some((f) => f.startsWith('code.'));
+
+    if (hasMetadata && hasCode) {
       try {
-        files = fs.readdirSync(currentPath);
+        const metadataContent = fs.readFileSync(path.join(dirPath, 'metadata.json'), 'utf-8');
+        const metadata = JSON.parse(metadataContent);
+        if (metadata &&
+          typeof metadata.name === 'string' && metadata.name.trim() !== '' &&
+          typeof metadata.category === 'string' && metadata.category.trim() !== '' &&
+          typeof metadata.comment === 'string' && metadata.comment.trim() !== '') {
+          return [dirPath];
+        }
       } catch {
-        return;
+        // Ignora erro de parsing e trata como diretório comum
       }
+    }
 
-      const hasMetadata = files.includes('metadata.json');
-      const hasCode = files.some((f) => f.startsWith('code.'));
-
-      if (hasMetadata && hasCode) {
-        try {
-          const metadataContent = fs.readFileSync(path.join(currentPath, 'metadata.json'), 'utf-8');
-          const metadata = JSON.parse(metadataContent);
-          if (metadata &&
-            typeof metadata.name === 'string' && metadata.name.trim() !== '' &&
-            typeof metadata.category === 'string' && metadata.category.trim() !== '' &&
-            typeof metadata.comment === 'string' && metadata.comment.trim() !== '') {
-            exerciseDirs.push(currentPath);
-          }
-        } catch {
-          // Ignora erro
+    let order: string[] = [];
+    if (hasMetadata) {
+      try {
+        const metadataContent = fs.readFileSync(path.join(dirPath, 'metadata.json'), 'utf-8');
+        const metadata = JSON.parse(metadataContent);
+        if (metadata && Array.isArray(metadata.order)) {
+          order = metadata.order;
         }
+      } catch {
+        // Ignora erro
       }
+    }
 
-      for (const file of files) {
-        const fullPath = path.join(currentPath, file);
-        try {
-          const stat = fs.statSync(fullPath);
-          if (stat.isDirectory()) {
-            traverse(fullPath);
-          }
-        } catch {
+    const subDirs: string[] = [];
+    for (const file of files) {
+      const fullPath = path.join(dirPath, file);
+      try {
+        const stat = fs.statSync(fullPath);
+        if (stat.isDirectory()) {
+          subDirs.push(file);
         }
+      } catch {
       }
-    };
+    }
 
-    traverse(dirPath);
+    if (order.length > 0) {
+      subDirs.sort((a, b) => {
+        const indexA = order.indexOf(a);
+        const indexB = order.indexOf(b);
+
+        if (indexA !== -1 && indexB !== -1) {
+          return indexA - indexB;
+        }
+        if (indexA !== -1) return -1;
+        if (indexB !== -1) return 1;
+
+        return a.localeCompare(b);
+      });
+    } else {
+      subDirs.sort((a, b) => a.localeCompare(b));
+    }
+
+    const exerciseDirs: string[] = [];
+    for (const subDir of subDirs) {
+      exerciseDirs.push(...this.getSortedExercisePaths(path.join(dirPath, subDir)));
+    }
+
     return exerciseDirs;
   }
 }
