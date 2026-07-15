@@ -1,0 +1,8 @@
+{
+  "name": "Múltiplos Retornos",
+  "difficulty": "medium",
+  "category": "Funções",
+  "comment": "Go resolveu que uma função pode devolver mais de uma resposta. Surpreendentemente, isso costuma facilitar as coisas.",
+  "detailedExplanation": "Uma característica marcante de Go é que funções podem retornar vários valores.\n\nEssa funcionalidade é amplamente utilizada na biblioteca padrão, principalmente para retornar um resultado e um possível erro.\n\nNeste exercício criamos uma função que retorna a soma e a multiplicação de dois números.",
+  "expectedOutput": "Soma: 10\n\nMultiplicação: 24"
+}

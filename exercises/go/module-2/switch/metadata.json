@@ -1,0 +1,8 @@
+{
+  "name": "Switch",
+  "difficulty": "easy",
+  "category": "Controle de Fluxo",
+  "comment": "Uma alternativa elegante para quando seu if else começa a parecer uma árvore genealógica.",
+  "detailedExplanation": "A estrutura `switch` permite executar diferentes blocos de código com base no valor de uma expressão.\n\nEla substitui sequências longas de `if` e `else if`, tornando o código mais legível.\n\nEm Go, não é necessário utilizar `break` ao final de cada caso.\n\nNeste exercício utilizamos um número para representar um dia da semana.",
+  "expectedOutput": "Dia selecionado: 3\n\nQuarta-feira"
+}

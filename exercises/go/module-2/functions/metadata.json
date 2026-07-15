@@ -1,0 +1,8 @@
+{
+  "name": "Funções",
+  "difficulty": "easy",
+  "category": "Funções",
+  "comment": "Finalmente você pode parar de copiar o mesmo código dez vezes. Seu teclado agradece.",
+  "detailedExplanation": "Funções permitem agrupar instruções que executam uma tarefa específica.\n\nUma função é declarada utilizando a palavra-chave `func`.\n\nDepois de criada, ela pode ser chamada quantas vezes forem necessárias.\n\nIsso reduz repetição de código e facilita manutenção.",
+  "expectedOutput": "Olá, Gopher!\n\nOlá, Allan!"
+}

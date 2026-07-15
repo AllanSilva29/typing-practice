@@ -1,0 +1,8 @@
+{
+  "name": "Ponteiros",
+  "difficulty": "medium",
+  "category": "Ponteiros",
+  "comment": "O famoso assunto que assusta iniciantes. No Go ele é muito menos dramático do que sua reputação sugere.",
+  "detailedExplanation": "Um ponteiro armazena o endereço de memória de uma variável.\n\nO operador `&` obtém o endereço de uma variável.\n\nO operador `*` acessa o valor armazenado nesse endereço.\n\nPonteiros permitem modificar valores sem fazer cópias desnecessárias.",
+  "expectedOutput": "Valor: 10\n\nValor alterado: 20"
+}

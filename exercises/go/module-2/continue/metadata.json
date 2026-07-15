@@ -1,0 +1,8 @@
+{
+  "name": "Continue",
+  "difficulty": "easy",
+  "category": "Laços",
+  "comment": "Às vezes o melhor plano é simplesmente ignorar o problema e seguir adiante.",
+  "detailedExplanation": "A instrução `continue` interrompe apenas a iteração atual do laço.\n\nA execução volta imediatamente para a próxima repetição.\n\nNeste exercício ignoramos o número 3.",
+  "expectedOutput": "1\n\n2\n\n4\n\n5"
+}

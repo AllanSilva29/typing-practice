@@ -1,0 +1,8 @@
+{
+  "name": "Operadores Relacionais",
+  "difficulty": "easy",
+  "category": "Operadores",
+  "comment": "Agora o programa pode comparar valores. Julgar pessoas ainda continua sendo responsabilidade sua.",
+  "detailedExplanation": "Operadores relacionais retornam valores booleanos (`true` ou `false`).\n\nOs principais são:\n\n- `==`\n- `!=`\n- `>`\n- `<`\n- `>=`\n- `<=`\n\nEsses operadores são utilizados principalmente em estruturas condicionais como `if`, que será apresentada no próximo exercício.",
+  "expectedOutput": "A é maior que B? true\n\nA é menor que B? false\n\nA é igual a B? false\n\nA é diferente de B? true"
+}

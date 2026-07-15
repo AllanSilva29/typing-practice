@@ -1,0 +1,8 @@
+{
+  "name": "Maps",
+  "difficulty": "medium",
+  "category": "Coleções",
+  "comment": "Finalmente uma estrutura que encontra informações sem você precisar decorar onde elas estão escondidas.",
+  "detailedExplanation": "Maps armazenam pares de chave e valor.\n\nSão equivalentes aos dicionários de Python ou aos objetos associativos encontrados em outras linguagens.\n\nUm map pode ser criado utilizando `make()`.\n\n```go\nidades := make(map[string]int)\n```\n\nTambém é possível inicializá-lo diretamente.\n\nNeste exercício armazenamos nomes e respectivas idades.",
+  "expectedOutput": "Allan: 25\n\nMaria: 31\n\nJoão: 28"
+}

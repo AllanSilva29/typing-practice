@@ -1,0 +1,8 @@
+{
+  "name": "Número Par ou Ímpar",
+  "difficulty": "easy",
+  "category": "Exercícios",
+  "comment": "O primeiro programa que realmente toma uma decisão útil. Ainda não vai revolucionar a computação, mas já é um avanço.",
+  "detailedExplanation": "O operador `%` retorna o resto de uma divisão.\n\nQuando um número é dividido por 2:\n\n- resto igual a 0 → número par;\n- resto diferente de 0 → número ímpar.\n\nEsse é um dos usos mais comuns do operador de módulo.",
+  "expectedOutput": "Número: 17\n\nO número é ímpar."
+}

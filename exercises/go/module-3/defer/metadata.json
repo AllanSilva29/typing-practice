@@ -1,0 +1,8 @@
+{
+  "name": "Defer",
+  "difficulty": "medium",
+  "category": "Funções",
+  "comment": "\"Faço isso depois.\" Finalmente uma funcionalidade que representa fielmente o comportamento humano.",
+  "detailedExplanation": "A palavra-chave `defer` agenda uma chamada de função para ser executada quando a função atual terminar.\n\nEla é muito utilizada para liberar recursos como arquivos, conexões de rede e mutexes.\n\nMesmo que existam vários `return`, todas as chamadas adiadas serão executadas.\n\nAs chamadas `defer` seguem a ordem LIFO (Last In, First Out).",
+  "expectedOutput": "Início da função.\n\nFim da função.\n\nEncerrando..."
+}

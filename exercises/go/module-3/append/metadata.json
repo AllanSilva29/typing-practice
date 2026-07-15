@@ -1,0 +1,8 @@
+{
+  "name": "Append",
+  "difficulty": "medium",
+  "category": "Coleções",
+  "comment": "Diferente dos arrays, slices aceitam crescer. Eles evoluíram emocionalmente.",
+  "detailedExplanation": "A função `append()` adiciona elementos ao final de um slice.\n\nSempre que necessário, Go cria internamente um novo array maior e copia os elementos.\n\nEssa operação é extremamente comum.\n\n```go\nslice = append(slice, valor)\n```\n\nTambém é possível adicionar vários elementos de uma vez.",
+  "expectedOutput": "[1 2 3 4 5]\n\nQuantidade: 5"
+}

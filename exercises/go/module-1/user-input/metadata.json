@@ -1,0 +1,8 @@
+{
+  "name": "Entrada do Usuário",
+  "difficulty": "easy",
+  "category": "Básico",
+  "comment": "Até agora o programa só falava. Finalmente alguém resolveu escutá-lo.",
+  "detailedExplanation": "Um programa realmente útil normalmente precisa receber informações do usuário.\n\nEm Go, uma das formas mais simples é utilizando `fmt.Scan()`.\n\nEle lê valores digitados no terminal e os armazena em variáveis.\n\nComo `Scan()` precisa alterar a variável, passamos seu endereço utilizando o operador `&`.\n\n```go\nfmt.Scan(&nome)\n```\n\nNeste exercício o programa pergunta o nome do usuário e o exibe em seguida.",
+  "expectedOutput": "Digite seu nome:\nAllan\n\nOlá, Allan!"
+}

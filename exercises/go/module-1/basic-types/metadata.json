@@ -1,0 +1,8 @@
+{
+  "name": "Tipos Básicos",
+  "difficulty": "easy",
+  "category": "Básico",
+  "comment": "Existem muitos tipos na programação. Felizmente Go decidiu não transformar isso em um zoológico.",
+  "detailedExplanation": "Go possui diversos tipos primitivos. Os mais utilizados são:\n\n- `int` para números inteiros;\n- `float64` para números com casas decimais;\n- `bool` para valores lógicos (`true` ou `false`);\n- `string` para textos.\n\nCada variável possui um tipo definido em tempo de compilação. Isso ajuda o compilador a detectar erros antes mesmo do programa ser executado.\n\nNeste exercício veremos como armazenar diferentes tipos de dados e imprimi-los.",
+  "expectedOutput": "Nome: Gopher\n\nIdade: 15\n\nNota: 9.8\n\nAprovado: true"
+}

@@ -1,0 +1,8 @@
+{
+  "name": "Parâmetros",
+  "difficulty": "easy",
+  "category": "Funções",
+  "comment": "A função faz o trabalho. Os parâmetros dizem exatamente qual trabalho ela deve fazer. É quase uma reunião produtiva.",
+  "detailedExplanation": "Parâmetros são valores recebidos por uma função.\n\nEles tornam uma função reutilizável, permitindo que ela trabalhe com diferentes dados sem alterar sua implementação.\n\nNeste exercício a função recebe dois números e calcula sua soma.",
+  "expectedOutput": "8 + 5 = 13\n\n20 + 7 = 27"
+}

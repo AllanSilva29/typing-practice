@@ -1,0 +1,8 @@
+{
+  "name": "Funções Anônimas",
+  "difficulty": "medium",
+  "category": "Funções",
+  "comment": "Às vezes uma função é importante o suficiente para existir. Mas não importante o bastante para ganhar um nome.",
+  "detailedExplanation": "Uma função anônima é criada sem receber um nome.\n\nEla pode ser armazenada em uma variável ou executada imediatamente.\n\nEsse recurso é frequentemente utilizado junto com goroutines e callbacks.",
+  "expectedOutput": "Olá do mundo das funções anônimas!"
+}

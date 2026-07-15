@@ -1,0 +1,8 @@
+{
+  "name": "Hello World",
+  "difficulty": "easy",
+  "category": "Básico",
+  "comment": "Seu primeiro programa em Go. Sim, ele imprime uma frase. Não subestime o clássico.",
+  "detailedExplanation": "Todo programa Go começa pelo pacote `main`. É ele que indica ao compilador que este arquivo gera um programa executável.\n\nA função `main()` é o ponto de entrada da aplicação. Quando você executa o programa, é nela que tudo começa.\n\nPara escrever texto no terminal usamos o pacote `fmt`, que significa \"format\".\n\nNeste exercício você conhecerá apenas a estrutura mínima necessária para executar um programa em Go.\n\nApesar de extremamente simples, praticamente todos os programas da linguagem começam exatamente dessa forma.",
+  "expectedOutput": "Hello, World!"
+}

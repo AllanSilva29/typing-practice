@@ -1,0 +1,8 @@
+{
+  "name": "Slices",
+  "difficulty": "medium",
+  "category": "Coleções",
+  "comment": "Se arrays são apartamentos, slices são apartamentos com parede removível. Muito mais flexíveis.",
+  "detailedExplanation": "Slices são a principal estrutura de coleção utilizada em Go.\n\nEles funcionam como uma visão sobre um array, mas possuem tamanho variável.\n\nUm slice é declarado assim:\n\n```go\nnomes := []string{\"Ana\", \"Carlos\", \"Maria\"}\n```\n\nNa prática, a maior parte dos programas Go utiliza slices em vez de arrays.",
+  "expectedOutput": "Primeiro: Ana\n\nQuantidade: 3\n\n[Ana Carlos Maria]"
+}

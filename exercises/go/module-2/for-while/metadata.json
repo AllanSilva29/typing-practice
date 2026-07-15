@@ -1,0 +1,8 @@
+{
+  "name": "For Como While",
+  "difficulty": "easy",
+  "category": "Laços",
+  "comment": "Go não possui while. O for aceitou acumular mais essa responsabilidade.",
+  "detailedExplanation": "Em Go, o `for` também pode ser utilizado como um `while`.\n\nBasta omitir a inicialização e o incremento.\n\n```go\nfor condicao {\n\t// código\n}\n```\n\nO laço continuará executando enquanto a condição for verdadeira.",
+  "expectedOutput": "Contador: 1\n\nContador: 2\n\nContador: 3\n\nContador: 4\n\nContador: 5"
+}

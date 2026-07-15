@@ -1,0 +1,8 @@
+{
+  "name": "Declaração Curta",
+  "difficulty": "easy",
+  "category": "Básico",
+  "comment": "Se você ainda escreve 'var' para tudo, Go começa a olhar torto para você.",
+  "detailedExplanation": "Go possui uma forma reduzida de declarar variáveis.\n\nEm vez de escrever:\n\n```go\nvar nome string = \"João\"\n```\n\nvocê pode simplesmente escrever:\n\n```go\nnome := \"João\"\n```\n\nO compilador descobre automaticamente o tipo da variável.\n\nEssa forma é utilizada na maior parte dos códigos escritos em Go.\n\nEla só pode ser utilizada dentro de funções.",
+  "expectedOutput": "Linguagem: Go\n\nVersão: 1.24\n\nÉ divertida? true"
+}

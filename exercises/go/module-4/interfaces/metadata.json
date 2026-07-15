@@ -1,0 +1,8 @@
+{
+  "name": "Interfaces",
+  "difficulty": "medium",
+  "category": "Interfaces",
+  "comment": "Em Go ninguém precisa pedir permissão para implementar uma interface. Basta fazer o trabalho corretamente.",
+  "detailedExplanation": "Uma interface define um conjunto de métodos.\n\nQualquer tipo que implemente esses métodos satisfaz automaticamente a interface.\n\nNão existe uma palavra-chave como `implements`.\n\nEsse modelo reduz acoplamento e torna o código mais flexível.",
+  "expectedOutput": "O cachorro faz: Au Au!"
+}

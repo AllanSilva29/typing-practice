@@ -1,0 +1,8 @@
+{
+  "name": "Conversão de Tipos",
+  "difficulty": "easy",
+  "category": "Básico",
+  "comment": "Diferente de algumas linguagens, Go prefere que você diga exatamente o que está fazendo. Preguiça de converter tipos não é argumento.",
+  "detailedExplanation": "Go não realiza conversões automáticas entre tipos numéricos.\n\nO código abaixo gera erro:\n\n```go\nvar idade int = 20\nvar altura float64 = idade\n```\n\nA conversão deve ser feita explicitamente.\n\n```go\naltura := float64(idade)\n```\n\nIsso evita conversões inesperadas e torna o código mais previsível.\n\nNeste exercício convertemos um número inteiro para ponto flutuante antes de utilizá-lo.",
+  "expectedOutput": "Valor inteiro: 42\n\nValor convertido: 42\n\nValor convertido + 0.5: 42.5"
+}

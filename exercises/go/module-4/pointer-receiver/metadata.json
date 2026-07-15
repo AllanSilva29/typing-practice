@@ -1,0 +1,8 @@
+{
+  "name": "Receiver por Ponteiro",
+  "difficulty": "medium",
+  "category": "Structs",
+  "comment": "Modificar uma struct sem ponteiros funciona tão bem quanto editar uma fotocópia esperando mudar o original.",
+  "detailedExplanation": "Métodos podem receber structs por valor ou por ponteiro.\n\nQuando utilizamos um receiver por valor, a struct é copiada.\n\nQuando utilizamos um receiver por ponteiro, o método altera a struct original.\n\nEssa é a forma mais comum para métodos que modificam o estado de um objeto.",
+  "expectedOutput": "Nova idade: 26"
+}

@@ -1,0 +1,8 @@
+{
+  "name": "For Clássico",
+  "difficulty": "easy",
+  "category": "Laços",
+  "comment": "Go possui apenas um laço. Felizmente ele faz o trabalho de vários.",
+  "detailedExplanation": "Go possui apenas uma estrutura de repetição: o `for`.\n\nA forma clássica é:\n\n```go\nfor inicializacao; condicao; incremento {\n\t// código\n}\n```\n\nEla funciona de maneira semelhante ao `for` encontrado em outras linguagens.\n\nNeste exercício imprimimos os números de 1 a 5.",
+  "expectedOutput": "1\n\n2\n\n3\n\n4\n\n5"
+}

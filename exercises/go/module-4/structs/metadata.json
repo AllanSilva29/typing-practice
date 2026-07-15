@@ -1,0 +1,8 @@
+{
+  "name": "Structs",
+  "difficulty": "medium",
+  "category": "Structs",
+  "comment": "Finalmente você pode agrupar informações sem criar dez variáveis com nomes parecidos. Sua dignidade agradece.",
+  "detailedExplanation": "Uma `struct` permite agrupar diferentes informações em um único tipo.\n\nEla é semelhante a uma classe simples em outras linguagens, porém sem herança.\n\nUma struct pode conter campos de diferentes tipos.\n\n```go\ntype Pessoa struct {\n    Nome  string\n    Idade int\n}\n```\n\nDepois de criada, podemos instanciar novos valores utilizando uma inicialização literal.\n\nStructs são amplamente utilizadas para representar entidades do mundo real.",
+  "expectedOutput": "Nome: Allan\n\nIdade: 25"
+}

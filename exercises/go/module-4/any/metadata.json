@@ -1,0 +1,8 @@
+{
+  "name": "Any",
+  "difficulty": "medium",
+  "category": "Interfaces",
+  "comment": "Às vezes você realmente aceita qualquer coisa. Só não reclame depois quando aparecer de tudo.",
+  "detailedExplanation": "Desde Go 1.18, `any` é um apelido para `interface{}`.\n\nEle representa qualquer tipo.\n\nÉ muito utilizado em APIs genéricas e bibliotecas.\n\nApesar de útil, seu uso excessivo elimina parte da segurança de tipos da linguagem.",
+  "expectedOutput": "42\n\nGo\n\ntrue"
+}

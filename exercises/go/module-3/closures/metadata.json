@@ -1,0 +1,8 @@
+{
+  "name": "Closures",
+  "difficulty": "medium",
+  "category": "Funções",
+  "comment": "A função foi embora, mas levou algumas variáveis na mochila. Go permite esse tipo de apego emocional.",
+  "detailedExplanation": "Closures são funções que conseguem acessar variáveis do ambiente onde foram criadas.\n\nMesmo depois que a função externa termina, essas variáveis continuam existindo enquanto a closure puder acessá-las.\n\nEsse recurso é bastante utilizado para encapsular estado.",
+  "expectedOutput": "1\n\n2\n\n3"
+}

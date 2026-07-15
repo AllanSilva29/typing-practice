@@ -1,0 +1,8 @@
+{
+  "name": "Structs Embutidas",
+  "difficulty": "medium",
+  "category": "Structs",
+  "comment": "Go não acredita em herança tradicional. Preferiu composição e seguiu a vida sem olhar para trás.",
+  "detailedExplanation": "Go incentiva composição em vez de herança.\n\nUma struct pode conter outra struct.\n\nQuando uma struct é embutida sem nome de campo, seus membros podem ser acessados diretamente.\n\nEssa técnica é chamada de **embedding**.\n\nEla permite reutilizar funcionalidades mantendo o código simples.",
+  "expectedOutput": "Cidade: Curitiba\n\nNome: Allan"
+}

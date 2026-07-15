@@ -1,0 +1,8 @@
+{
+  "name": "Type Switch",
+  "difficulty": "medium",
+  "category": "Interfaces",
+  "comment": "Quando um if não é suficiente para descobrir quem apareceu na festa.",
+  "detailedExplanation": "O *type switch* permite executar diferentes blocos dependendo do tipo concreto armazenado em uma interface.\n\nSua sintaxe é semelhante ao `switch` tradicional.\n\nÉ muito utilizado em bibliotecas e frameworks que trabalham com tipos genéricos.",
+  "expectedOutput": "Recebi um inteiro: 10\n\nRecebi uma string: Go\n\nRecebi um booleano: true"
+}

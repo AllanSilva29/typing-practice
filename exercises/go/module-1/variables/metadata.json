@@ -1,0 +1,8 @@
+{
+  "name": "Variáveis",
+  "difficulty": "easy",
+  "category": "Básico",
+  "comment": "Finalmente algo que muda de valor. A vida também funciona assim.",
+  "detailedExplanation": "Variáveis armazenam informações durante a execução do programa.\n\nEm Go, a palavra-chave `var` declara uma variável.\n\nA sintaxe é:\n\n```go\nvar nome tipo\n```\n\nVocê também pode inicializar o valor imediatamente.\n\n```go\nvar idade int = 25\n```\n\nGo possui tipagem estática, então o tipo da variável é conhecido durante a compilação.\n\nNeste exercício declaramos três variáveis de tipos diferentes e imprimimos seus valores.",
+  "expectedOutput": "Nome: Allan\n\nIdade: 25\n\nAltura: 1.78"
+}

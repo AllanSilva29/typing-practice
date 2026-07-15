@@ -1,0 +1,8 @@
+{
+  "name": "Retornos Nomeados",
+  "difficulty": "medium",
+  "category": "Funções",
+  "comment": "Dar nome aos retornos pode deixar o código mais claro. Ou mais confuso. Use com moderação, como cafeína.",
+  "detailedExplanation": "Em Go, os valores de retorno podem receber nomes.\n\nEsses nomes funcionam como variáveis locais da função e podem ser retornados apenas com a palavra `return`.\n\nEmbora seja um recurso útil em algumas situações, principalmente em funções curtas, seu uso excessivo pode reduzir a legibilidade.",
+  "expectedOutput": "Área: 50\n\nPerímetro: 30"
+}

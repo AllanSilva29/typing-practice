@@ -1,0 +1,8 @@
+{
+  "name": "Constantes",
+  "difficulty": "easy",
+  "category": "Básico",
+  "comment": "Algumas coisas nunca mudam. As constantes são uma delas. A documentação também espera que você não tente convencê-las do contrário.",
+  "detailedExplanation": "Constantes representam valores que nunca poderão ser alterados durante a execução do programa.\n\nElas são declaradas utilizando a palavra-chave `const`.\n\n```go\nconst pi = 3.14159\n```\n\nAo contrário das variáveis, uma constante não pode receber um novo valor posteriormente.\n\nConstantes são ideais para representar informações fixas, como valores matemáticos, limites conhecidos ou textos que nunca serão modificados.",
+  "expectedOutput": "Pi: 3.1415926535\n\nLinguagem: Go"
+}

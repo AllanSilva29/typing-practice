@@ -1,0 +1,8 @@
+{
+  "name": "Arrays",
+  "difficulty": "medium",
+  "category": "Coleções",
+  "comment": "Um array possui tamanho fixo. Ele é extremamente organizado e igualmente inflexível.",
+  "detailedExplanation": "Um array é uma sequência de elementos do mesmo tipo com tamanho definido em tempo de compilação.\n\nSua sintaxe é:\n\n```go\nvar numeros [5]int\n```\n\nou\n\n```go\nnumeros := [5]int{10, 20, 30, 40, 50}\n```\n\nO tamanho faz parte do tipo. Um `[5]int` é diferente de um `[10]int`.\n\nPor esse motivo, arrays são menos utilizados que slices em Go, embora ainda sejam importantes para compreender o funcionamento da linguagem.",
+  "expectedOutput": "Primeiro: 10\n\nÚltimo: 50\n\nArray completo: [10 20 30 40 50]"
+}

@@ -1,0 +1,8 @@
+{
+  "name": "Type Assertion",
+  "difficulty": "medium",
+  "category": "Interfaces",
+  "comment": "Você disse que aceitava qualquer tipo. Agora precisa descobrir o que realmente recebeu.",
+  "detailedExplanation": "Quando trabalhamos com `any` ou `interface{}`, podemos recuperar o tipo original utilizando uma *type assertion*.\n\nA forma segura retorna dois valores:\n\n```go\nvalor, ok := dado.(string)\n```\n\nSe `ok` for `true`, a conversão foi realizada com sucesso.",
+  "expectedOutput": "Texto recebido: Olá, Go!"
+}

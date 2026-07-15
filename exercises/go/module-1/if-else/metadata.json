@@ -1,0 +1,8 @@
+{
+  "name": "If e Else",
+  "difficulty": "easy",
+  "category": "Controle de Fluxo",
+  "comment": "Finalmente o programa começou a tomar decisões. Ainda não são boas decisões, mas é um começo.",
+  "detailedExplanation": "A estrutura `if` permite executar blocos diferentes dependendo de uma condição.\n\nSua sintaxe é simples:\n\n```go\nif condição {\n\t// código\n}\n```\n\nTambém é possível adicionar um bloco `else`.\n\n```go\nif condição {\n\t// verdadeiro\n} else {\n\t// falso\n}\n```\n\nAs condições devem sempre resultar em um valor booleano.\n\nNeste exercício verificamos se uma pessoa é maior de idade.",
+  "expectedOutput": "Idade: 20\n\nMaior de idade."
+}

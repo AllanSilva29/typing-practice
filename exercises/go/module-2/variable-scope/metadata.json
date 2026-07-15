@@ -1,0 +1,8 @@
+{
+  "name": "Escopo de Variáveis",
+  "difficulty": "easy",
+  "category": "Fundamentos",
+  "comment": "O fato de você ter criado uma variável não significa que ela queira ser vista por todo o programa.",
+  "detailedExplanation": "O escopo define onde uma variável pode ser utilizada.\n\nUma variável declarada dentro de um bloco (`{}`) existe apenas dentro daquele bloco.\n\nApós o bloco terminar, a variável deixa de existir.\n\nIsso evita conflitos de nomes e torna o código mais organizado.\n\nNeste exemplo a variável `mensagem` só pode ser utilizada dentro do `if`.",
+  "expectedOutput": "Entrou no bloco.\n\nEsta variável existe apenas aqui.\n\nFim do programa."
+}

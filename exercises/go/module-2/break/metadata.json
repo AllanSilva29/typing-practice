@@ -1,0 +1,8 @@
+{
+  "name": "Break",
+  "difficulty": "easy",
+  "category": "Laços",
+  "comment": "Quando você já encontrou o que queria e não pretende continuar trabalhando.",
+  "detailedExplanation": "A instrução `break` encerra imediatamente o laço atual.\n\nEla é útil quando uma condição especial é encontrada e não faz sentido continuar a repetição.\n\nNeste exemplo o laço é interrompido ao chegar no número 5.",
+  "expectedOutput": "1\n\n2\n\n3\n\n4\n\nNúmero encontrado."
+}

@@ -1,0 +1,8 @@
+{
+  "name": "Múltiplas Implementações",
+  "difficulty": "medium",
+  "category": "Interfaces",
+  "comment": "A interface não se importa quem você é. Apenas quer saber se você sabe fazer o trabalho.",
+  "detailedExplanation": "Uma das maiores vantagens das interfaces é permitir que diferentes tipos sejam tratados da mesma forma.\n\nNeste exemplo, `Cachorro` e `Gato` implementam a mesma interface.\n\nA função `apresentar()` pode receber qualquer um deles.",
+  "expectedOutput": "Som: Au Au!\n\nSom: Miau!"
+}

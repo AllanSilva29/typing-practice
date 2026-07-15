@@ -1,0 +1,8 @@
+{
+  "name": "Range",
+  "difficulty": "medium",
+  "category": "Coleções",
+  "comment": "Escrever índices manualmente é divertido até a terceira centena de elementos.",
+  "detailedExplanation": "A palavra-chave `range` facilita a iteração sobre coleções.\n\nEla retorna dois valores:\n\n- índice;\n- elemento.\n\nCaso um deles não seja necessário, utiliza-se o identificador `_`.\n\nNeste exercício percorremos um slice imprimindo seus índices e valores.",
+  "expectedOutput": "0 -> Go\n\n1 -> Rust\n\n2 -> Python\n\n3 -> Java"
+}

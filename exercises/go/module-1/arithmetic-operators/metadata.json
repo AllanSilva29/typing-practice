@@ -1,0 +1,8 @@
+{
+  "name": "Operadores Aritméticos",
+  "difficulty": "easy",
+  "category": "Operadores",
+  "comment": "Computadores foram inventados para fazer contas rapidamente. O resto veio como consequência.",
+  "detailedExplanation": "Go possui os operadores matemáticos mais comuns:\n\n- `+` soma\n- `-` subtração\n- `*` multiplicação\n- `/` divisão\n- `%` resto da divisão\n\nEles funcionam da maneira esperada para números inteiros e de ponto flutuante.\n\nNeste exercício calculamos diversas operações utilizando dois números.",
+  "expectedOutput": "Soma: 18\n\nSubtração: 6\n\nMultiplicação: 72\n\nDivisão: 2\n\nResto: 0"
+}

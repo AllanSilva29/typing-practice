@@ -1,0 +1,8 @@
+{
+  "name": "Métodos",
+  "difficulty": "medium",
+  "category": "Structs",
+  "comment": "Uma função resolveu morar dentro de um tipo. A vizinhança parece ter aprovado.",
+  "detailedExplanation": "Um método é uma função associada a um tipo.\n\nEle recebe um parâmetro especial chamado **receiver**.\n\n```go\nfunc (p Pessoa) Saudacao() {\n    ...\n}\n```\n\nIsso permite organizar melhor o código e aproximar comportamentos dos dados que eles manipulam.",
+  "expectedOutput": "Olá! Meu nome é Allan."
+}
