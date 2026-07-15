@@ -12,6 +12,7 @@ export interface Snippet {
   detailedExplanation: string;
   expectedOutput: string;
   relativePath: string;
+  lineExplanations?: Record<number, string>;
 }
 
 export class SnippetService {
@@ -56,6 +57,31 @@ export class SnippetService {
 
           const codeContent = fs.readFileSync(path.join(exercisePath, codeFile), 'utf-8');
 
+          const explanationsFile = files.find(f => 
+            f === 'explanations.txt' || 
+            f === 'line_explanations.txt' || 
+            f === 'lines.txt'
+          );
+
+          let lineExplanations: Record<number, string> | undefined;
+          if (explanationsFile) {
+            try {
+              const content = fs.readFileSync(path.join(exercisePath, explanationsFile), 'utf-8');
+              lineExplanations = {};
+              const lines = content.split('\n');
+              for (const line of lines) {
+                const match = line.match(/^(\d+)\s*-->\s*(.+)$/);
+                if (match) {
+                  const lineNum = parseInt(match[1], 10);
+                  const explanation = match[2].trim();
+                  lineExplanations[lineNum] = explanation;
+                }
+              }
+            } catch (err) {
+              console.error(`Erro ao carregar explicações por linha em ${exercisePath}:`, err);
+            }
+          }
+
           const relativeToExercises = path.relative(exercisesPath, exercisePath);
           const parts = relativeToExercises.split(path.sep);
           const lang = parts[0];
@@ -73,7 +99,8 @@ export class SnippetService {
             category: metadata.category,
             detailedExplanation: metadata.detailedExplanation || '',
             expectedOutput: metadata.expectedOutput || '',
-            relativePath: relativeToLang
+            relativePath: relativeToLang,
+            lineExplanations
           });
         } catch (err) {
           console.error(`Erro ao carregar exercício em ${exercisePath}:`, err);

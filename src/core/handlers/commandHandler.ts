@@ -75,6 +75,13 @@ export class CommandHandler {
       }
     });
 
+    const showExplanationCommand = vscode.commands.registerCommand(
+      'typingPractice.showExplanationDetails',
+      (lineNum: number, explanation: string) => {
+        vscode.window.showInformationMessage(`Linha ${lineNum}: ${explanation}`);
+      }
+    );
+
     context.subscriptions.push(
       typeCommand,
       deleteLeftCommand,
@@ -84,7 +91,8 @@ export class CommandHandler {
       cutCommand,
       deleteWordLeftCommand,
       deleteRightCommand,
-      deleteWordRightCommand
+      deleteWordRightCommand,
+      showExplanationCommand
     );
   }
 }

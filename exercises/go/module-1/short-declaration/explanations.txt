@@ -1,0 +1,9 @@
+1 --> Define o pacote principal do programa.
+3 --> Importa o pacote fmt para saída de texto.
+5 --> Ponto de entrada do programa.
+6 --> Declara e inicializa de forma curta a variável 'linguagem' com a string "Go".
+7 --> Declara e inicializa de forma curta a variável 'versao' com o valor decimal 1.24.
+8 --> Declara e inicializa de forma curta a variável booleana 'divertida' como true.
+10 --> Exibe a linguagem no console.
+11 --> Exibe a versão no console.
+12 --> Exibe se a linguagem é divertida no console.

@@ -95,3 +95,22 @@ exercises/
 ### Regras de Ordenação:
 * **`order`**: Array de strings com os nomes exatos das subpastas imediatas na sequência em que devem aparecer.
 * Subpastas que **não** forem listadas no array `"order"` serão enviadas para o fim da lista e ordenadas alfabeticamente.
+
+---
+
+## 4. Explicações por Linha (Opcional)
+
+Você pode adicionar explicações detalhadas que aparecem em formato de pop-up (dialog informativo) assim que o usuário termina de digitar uma linha específica do exercício.
+
+Para fazer isso, crie um arquivo chamado `explanations.txt` (ou `line_explanations.txt` ou `lines.txt`) dentro da pasta do exercício com o seguinte formato:
+
+```text
+[número_da_linha] --> [texto da explicação]
+```
+
+### Exemplo de `explanations.txt`:
+```text
+1 --> O pacote main define que este arquivo é um programa executável.
+3 --> O import "fmt" traz funções de formatação e saída de texto.
+5 --> A função main é o ponto de entrada principal do programa.
+```

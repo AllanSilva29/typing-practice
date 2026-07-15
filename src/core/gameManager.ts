@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { Snippet, SnippetService } from './services/snippetService';
 import { AISuggestionService } from './services/aiSuggestionService';
-import { skipWhitespace, ACCENT_MAP, isDoubleTrigger } from './utils';
+import { skipWhitespace, ACCENT_MAP, isDoubleTrigger, positionAt } from './utils';
 import { CodeExecutionService } from './services/codeExecutionService';
 import { GameDecoratorService } from './services/gameDecoratorService';
 import { FileHandler } from './handlers/fileHandler';
@@ -30,6 +30,10 @@ export class GameManager {
     vscode.StatusBarAlignment.Left,
     100
   );
+  private explanationStatusBarItem: vscode.StatusBarItem = vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Left,
+    99
+  );
 
   private onCompleteCallback?: (stats: { ppm: number; accuracy: number; snippetId: string }) => void;
   private onStopCallback?: () => void;
@@ -48,6 +52,14 @@ export class GameManager {
 
   get isCompleted(): boolean {
     return this.state === 'completed';
+  }
+
+  get currentPracticeUri(): vscode.Uri | null {
+    return this.currentUri;
+  }
+
+  get currentSnippet(): Snippet | null {
+    return this.activeSnippet;
   }
 
   async start(snippet: Snippet): Promise<void> {
@@ -85,9 +97,10 @@ export class GameManager {
     this.history = [];
     this.pendingAccent = null;
     this.lastCorrectChar = '';
-    this.lastCorrectTime = 0;
+    this.lastCorrectTime = Date.now();
     this.lastCorrectSource = null;
     this.isResettingDocument = false;
+    this.explanationStatusBarItem.hide();
     this.metrics.start();
   }
 
@@ -107,6 +120,22 @@ export class GameManager {
     const selSub = vscode.window.onDidChangeTextEditorSelection((e) => {
       if (this.state !== 'playing') return;
       SelectionHandler.enforceCursorPosition(e, this.currentUri, this.currentIndex, this.errorIndex, this.activeSnippet!.code);
+
+      const lineNum = e.selections[0].active.line + 1;
+      const explanation = this.activeSnippet?.lineExplanations?.[lineNum];
+      if (explanation) {
+        const truncated = explanation.length > 50 ? explanation.substring(0, 47) + '...' : explanation;
+        this.explanationStatusBarItem.text = `$(info) Linha ${lineNum}: ${truncated}`;
+        this.explanationStatusBarItem.tooltip = `Linha ${lineNum}: ${explanation}\n\nClique para abrir em janela pop-up.`;
+        this.explanationStatusBarItem.command = {
+          title: 'Mostrar Detalhes da Linha',
+          command: 'typingPractice.showExplanationDetails',
+          arguments: [lineNum, explanation]
+        };
+        this.explanationStatusBarItem.show();
+      } else {
+        this.explanationStatusBarItem.hide();
+      }
     });
 
     const activeEditorSub = vscode.window.onDidChangeActiveTextEditor((activeEditor) => {
@@ -276,7 +305,7 @@ export class GameManager {
 
       this.pendingAccent = null;
       this.metrics.recordKeystroke(true);
-      
+
       this.history.push(this.currentIndex);
       this.currentIndex++;
 
@@ -338,7 +367,7 @@ export class GameManager {
 
   private refresh(editor: vscode.TextEditor): void {
     const code = this.activeSnippet!.code;
-    this.decorator.update(editor, code, this.currentIndex, this.errorIndex);
+    this.decorator.update(editor, code, this.currentIndex, this.errorIndex, this.activeSnippet?.lineExplanations);
     this.decorator.syncCursor(editor, code, this.currentIndex, this.errorIndex);
   }
 
@@ -409,6 +438,7 @@ export class GameManager {
 
     this.activeSnippet = null;
     this.statusBarItem.hide();
+    this.explanationStatusBarItem.hide();
 
     if (!completed && this.onStopCallback) {
       this.onStopCallback();
@@ -417,5 +447,6 @@ export class GameManager {
 
   dispose(): void {
     this.statusBarItem.dispose();
+    this.explanationStatusBarItem.dispose();
   }
 }

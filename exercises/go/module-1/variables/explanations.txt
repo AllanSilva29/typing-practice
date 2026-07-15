@@ -1,0 +1,9 @@
+1 --> Define o pacote principal do programa.
+3 --> Importa o pacote fmt para exibir e formatar textos.
+5 --> Ponto de entrada do programa.
+6 --> Declara a variável de texto (string) 'nome' com o valor "Allan".
+7 --> Declara a variável numérica inteira (int) 'idade' com o valor 25.
+8 --> Declara a variável numérica decimal (float64) 'altura' com o valor 1.78.
+10 --> Exibe a mensagem correspondente ao nome do usuário no console.
+11 --> Exibe a mensagem correspondente à idade do usuário no console.
+12 --> Exibe a mensagem correspondente à altura do usuário no console.

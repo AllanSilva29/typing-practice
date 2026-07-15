@@ -1,0 +1,4 @@
+1 --> Define o pacote principal do programa. Todo programa executável em Go deve iniciar com o package main. 
+3 --> Importa o pacote fmt (format), que fornece funções de formatação e escrita/leitura na saída padrão.
+5 --> Declara a função main, que é o ponto de entrada oficial do programa Go.
+6 --> Exibe a mensagem "Hello, World!" seguida de uma nova linha no terminal.
