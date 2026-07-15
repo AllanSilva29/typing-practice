@@ -126,7 +126,10 @@ export class GameManager {
       const change = e.contentChanges[0];
       const insertedText = change.text;
 
-      if (!insertedText) return;
+      if (!insertedText) {
+        await this.resetDocumentText();
+        return;
+      }
 
       await this.handleCompositionType(insertedText);
     });
@@ -236,6 +239,7 @@ export class GameManager {
     } finally {
       this.isResettingDocument = false;
     }
+    this.refresh(editor);
   }
 
   private async handleCompositionType(text: string): Promise<void> {

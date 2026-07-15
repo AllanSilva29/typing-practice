@@ -53,6 +53,38 @@ export class CommandHandler {
       await vscode.commands.executeCommand('default:cut', args);
     });
 
-    context.subscriptions.push(typeCommand, deleteLeftCommand, stopCommand, resetCommand, pasteCommand, cutCommand);
+    const deleteWordLeftCommand = vscode.commands.registerCommand('deleteWordLeft', async () => {
+      if (!gameManager.isPlaying && !gameManager.isCompleted) {
+        await vscode.commands.executeCommand('default:deleteWordLeft');
+        return;
+      }
+      await gameManager.handleBackspace();
+    });
+
+    const deleteRightCommand = vscode.commands.registerCommand('deleteRight', async () => {
+      if (!gameManager.isPlaying && !gameManager.isCompleted) {
+        await vscode.commands.executeCommand('default:deleteRight');
+        return;
+      }
+    });
+
+    const deleteWordRightCommand = vscode.commands.registerCommand('deleteWordRight', async () => {
+      if (!gameManager.isPlaying && !gameManager.isCompleted) {
+        await vscode.commands.executeCommand('default:deleteWordRight');
+        return;
+      }
+    });
+
+    context.subscriptions.push(
+      typeCommand,
+      deleteLeftCommand,
+      stopCommand,
+      resetCommand,
+      pasteCommand,
+      cutCommand,
+      deleteWordLeftCommand,
+      deleteRightCommand,
+      deleteWordRightCommand
+    );
   }
 }
