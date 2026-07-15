@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { Snippet, SnippetService } from './services/snippetService';
 import { AISuggestionService } from './services/aiSuggestionService';
-import { skipWhitespace } from './utils';
+import { skipWhitespace, ACCENT_MAP } from './utils';
 import { CodeExecutionService } from './services/codeExecutionService';
 import { GameDecoratorService } from './services/gameDecoratorService';
 import { FileHandler } from './handlers/fileHandler';
@@ -14,6 +14,7 @@ export class GameManager {
   private currentIndex: number = 0;
   private errorIndex: number = -1;
   private history: number[] = [];
+  private pendingAccent: string | null = null;
 
   private state: 'idle' | 'playing' | 'completed' = 'idle';
   private suppressor = new AISuggestionService();
@@ -78,6 +79,7 @@ export class GameManager {
     this.currentIndex = 0;
     this.errorIndex = -1;
     this.history = [];
+    this.pendingAccent = null;
     this.metrics.start();
   }
 
@@ -135,7 +137,30 @@ export class GameManager {
     const code = this.activeSnippet.code;
     const targetChar = code[this.currentIndex];
 
-    const isCorrectChar = character === targetChar || (targetChar === '\n' && character === '\n');
+    let isCorrectChar = false;
+
+    // Se houver acento pendente
+    if (this.pendingAccent !== null) {
+      const composition = ACCENT_MAP[targetChar];
+      if (composition && composition.accents.includes(this.pendingAccent) && character === composition.base) {
+        isCorrectChar = true;
+      }
+      this.pendingAccent = null;
+    } else {
+      // Se não houver acento pendente, verifica se o caractere digitado é o caractere alvo diretamente
+      if (character === targetChar || (targetChar === '\n' && character === '\n')) {
+        isCorrectChar = true;
+      } else {
+        // Se não for correto, verifica se o caractere alvo aceita composição e o caractere digitado é um dos acentos válidos
+        const composition = ACCENT_MAP[targetChar];
+        if (composition && composition.accents.includes(character)) {
+          this.pendingAccent = character;
+          // Retorna sem erro e sem avançar, aguardando o próximo caractere (a base)
+          return;
+        }
+      }
+    }
+
     this.metrics.recordKeystroke(isCorrectChar);
 
     const isError = this.errorIndex !== -1 || !isCorrectChar;
@@ -171,6 +196,12 @@ export class GameManager {
     const editor = vscode.window.activeTextEditor;
     if (!editor || editor.document.uri.toString() !== this.currentUri.toString()) {
       await vscode.commands.executeCommand('default:deleteLeft');
+      return;
+    }
+
+    if (this.pendingAccent !== null) {
+      this.pendingAccent = null;
+      this.refresh(editor);
       return;
     }
 
@@ -239,6 +270,7 @@ export class GameManager {
     if (this.state === 'idle') return;
 
     this.state = 'idle';
+    this.pendingAccent = null;
 
     this.disposables.forEach((d) => d.dispose());
     this.disposables = [];

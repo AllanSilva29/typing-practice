@@ -33,3 +33,46 @@ export function skipWhitespace(text: string, startIndex: number): number {
   }
   return index;
 }
+
+export const ACCENT_MAP: { [key: string]: { accents: string[], base: string } } = {
+  // Tilde
+  'ã': { accents: ['~'], base: 'a' },
+  'õ': { accents: ['~'], base: 'o' },
+  'Ã': { accents: ['~'], base: 'A' },
+  'Õ': { accents: ['~'], base: 'O' },
+  // Acute
+  'á': { accents: ['´', '\''], base: 'a' },
+  'é': { accents: ['´', '\''], base: 'e' },
+  'í': { accents: ['´', '\''], base: 'i' },
+  'ó': { accents: ['´', '\''], base: 'o' },
+  'ú': { accents: ['´', '\''], base: 'u' },
+  'Á': { accents: ['´', '\''], base: 'A' },
+  'É': { accents: ['´', '\''], base: 'E' },
+  'Í': { accents: ['´', '\''], base: 'I' },
+  'Ó': { accents: ['´', '\''], base: 'O' },
+  'Ú': { accents: ['´', '\''], base: 'U' },
+  // Cedilla
+  'ç': { accents: ['´', '\''], base: 'c' },
+  'Ç': { accents: ['´', '\''], base: 'C' },
+  // Circumflex
+  'â': { accents: ['^'], base: 'a' },
+  'ê': { accents: ['^'], base: 'e' },
+  'ô': { accents: ['^'], base: 'o' },
+  'Â': { accents: ['^'], base: 'A' },
+  'Ê': { accents: ['^'], base: 'E' },
+  'Ô': { accents: ['^'], base: 'O' },
+  // Grave
+  'à': { accents: ['`'], base: 'a' },
+  'À': { accents: ['`'], base: 'A' },
+  // Umlaut
+  'ä': { accents: ['¨', '"'], base: 'a' },
+  'ë': { accents: ['¨', '"'], base: 'e' },
+  'ï': { accents: ['¨', '"'], base: 'i' },
+  'ö': { accents: ['¨', '"'], base: 'o' },
+  'ü': { accents: ['¨', '"'], base: 'u' },
+  'Ä': { accents: ['¨', '"'], base: 'A' },
+  'Ë': { accents: ['¨', '"'], base: 'E' },
+  'Ï': { accents: ['¨', '"'], base: 'I' },
+  'Ö': { accents: ['¨', '"'], base: 'O' },
+  'Ü': { accents: ['¨', '"'], base: 'U' },
+};
