@@ -1,0 +1,14 @@
+{
+  "order": [
+    "hello-world",
+    "variables",
+    "short-declaration",
+    "basic-types",
+    "constants",
+    "type-conversion",
+    "user-input",
+    "arithmetic-operators",
+    "relational-operators",
+    "if-else"
+  ]
+}

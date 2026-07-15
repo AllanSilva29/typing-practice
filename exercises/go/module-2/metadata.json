@@ -1,0 +1,15 @@
+{
+  "order": [
+    "switch",
+    "classic-for",
+    "for-while",
+    "break",
+    "continue",
+    "variable-scope",
+    "even-or-odd",
+    "functions",
+    "function-parameters",
+    "multiple-returns",
+    "struct-method"
+  ]
+}

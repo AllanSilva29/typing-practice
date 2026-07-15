@@ -1,0 +1,14 @@
+{
+  "order": [
+    "structs",
+    "methods",
+    "pointers",
+    "pointer-receiver",
+    "embedded-structs",
+    "interfaces",
+    "multiple-implementations",
+    "any",
+    "type-assertion",
+    "type-switch"
+  ]
+}
