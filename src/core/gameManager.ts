@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { Snippet, SnippetService } from './services/snippetService';
 import { AISuggestionService } from './services/aiSuggestionService';
-import { skipWhitespace, ACCENT_MAP } from './utils';
+import { skipWhitespace, ACCENT_MAP, isDoubleTrigger } from './utils';
 import { CodeExecutionService } from './services/codeExecutionService';
 import { GameDecoratorService } from './services/gameDecoratorService';
 import { FileHandler } from './handlers/fileHandler';
@@ -15,6 +15,10 @@ export class GameManager {
   private errorIndex: number = -1;
   private history: number[] = [];
   private pendingAccent: string | null = null;
+  private lastCorrectChar: string = '';
+  private lastCorrectTime: number = 0;
+  private lastCorrectSource: 'type' | 'composition' | null = null;
+  private isResettingDocument: boolean = false;
 
   private state: 'idle' | 'playing' | 'completed' = 'idle';
   private suppressor = new AISuggestionService();
@@ -80,6 +84,10 @@ export class GameManager {
     this.errorIndex = -1;
     this.history = [];
     this.pendingAccent = null;
+    this.lastCorrectChar = '';
+    this.lastCorrectTime = 0;
+    this.lastCorrectSource = null;
+    this.isResettingDocument = false;
     this.metrics.start();
   }
 
@@ -108,9 +116,19 @@ export class GameManager {
     });
 
     const docChangeSub = vscode.workspace.onDidChangeTextDocument(async (e) => {
-      if (this.state === 'playing' && this.currentUri && e.document.uri.toString() === this.currentUri.toString()) {
-        await vscode.commands.executeCommand('undo');
+      if (this.state !== 'playing' || !this.currentUri || e.document.uri.toString() !== this.currentUri.toString()) {
+        return;
       }
+      if (this.isResettingDocument) return;
+
+      if (e.contentChanges.length === 0) return;
+
+      const change = e.contentChanges[0];
+      const insertedText = change.text;
+
+      if (!insertedText) return;
+
+      await this.handleCompositionType(insertedText);
     });
 
     this.disposables.push(selSub, activeEditorSub, docChangeSub);
@@ -134,30 +152,40 @@ export class GameManager {
       return;
     }
 
+    // Evita processamento duplo se o mesmo caractere já foi tratado pela composição recentemente
+    if (
+      Date.now() - this.lastCorrectTime < 100 &&
+      this.lastCorrectSource === 'composition' &&
+      isDoubleTrigger(this.lastCorrectChar, character)
+    ) {
+      return;
+    }
+
     const code = this.activeSnippet.code;
     const targetChar = code[this.currentIndex];
 
+    this.statusBarItem.text = `Digitado: "${character}" | Esperado: "${targetChar}" | Acento: "${this.pendingAccent}"`;
+
     let isCorrectChar = false;
 
-    // Se houver acento pendente
-    if (this.pendingAccent !== null) {
+    // Verifica se o caractere digitado é o caractere alvo diretamente (cobre composição concluída pelo SO)
+    if (character === targetChar || (targetChar === '\n' && character === '\n')) {
+      isCorrectChar = true;
+      this.pendingAccent = null;
+    } else if (this.pendingAccent !== null) {
+      // Se houver acento pendente e o SO não tiver feito a composição (envia caractere base isolado)
       const composition = ACCENT_MAP[targetChar];
       if (composition && composition.accents.includes(this.pendingAccent) && character === composition.base) {
         isCorrectChar = true;
       }
       this.pendingAccent = null;
     } else {
-      // Se não houver acento pendente, verifica se o caractere digitado é o caractere alvo diretamente
-      if (character === targetChar || (targetChar === '\n' && character === '\n')) {
-        isCorrectChar = true;
-      } else {
-        // Se não for correto, verifica se o caractere alvo aceita composição e o caractere digitado é um dos acentos válidos
-        const composition = ACCENT_MAP[targetChar];
-        if (composition && composition.accents.includes(character)) {
-          this.pendingAccent = character;
-          // Retorna sem erro e sem avançar, aguardando o próximo caractere (a base)
-          return;
-        }
+      // Se não houver acento pendente e o caractere não for o alvo, verifica se é um acento válido para a composição
+      const composition = ACCENT_MAP[targetChar];
+      if (composition && composition.accents.includes(character)) {
+        this.pendingAccent = character;
+        // Retorna sem erro e sem avançar, aguardando o próximo caractere (a base ou a composição concluída)
+        return;
       }
     }
 
@@ -168,6 +196,12 @@ export class GameManager {
       this.errorIndex = this.errorIndex === -1 ? this.currentIndex : this.errorIndex;
       this.refresh(editor);
       return;
+    }
+
+    if (isCorrectChar) {
+      this.lastCorrectChar = character;
+      this.lastCorrectTime = Date.now();
+      this.lastCorrectSource = 'type';
     }
 
     this.history.push(this.currentIndex);
@@ -183,6 +217,88 @@ export class GameManager {
     }
 
     this.refresh(editor);
+  }
+
+  private async resetDocumentText(): Promise<void> {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor || !this.currentUri || !this.activeSnippet) return;
+
+    this.isResettingDocument = true;
+    try {
+      const document = editor.document;
+      const fullRange = new vscode.Range(
+        document.positionAt(0),
+        document.positionAt(document.getText().length)
+      );
+      await editor.edit(editBuilder => {
+        editBuilder.replace(fullRange, this.activeSnippet!.code);
+      }, { undoStopBefore: false, undoStopAfter: false });
+    } finally {
+      this.isResettingDocument = false;
+    }
+  }
+
+  private async handleCompositionType(text: string): Promise<void> {
+    if (this.state !== 'playing' || !this.activeSnippet || !this.currentUri) return;
+
+    const editor = vscode.window.activeTextEditor;
+    if (!editor || editor.document.uri.toString() !== this.currentUri.toString()) {
+      return;
+    }
+
+    // Evita processamento duplo se o mesmo caractere já foi tratado pelo comando type recentemente
+    if (
+      Date.now() - this.lastCorrectTime < 100 &&
+      this.lastCorrectSource === 'type' &&
+      isDoubleTrigger(this.lastCorrectChar, text)
+    ) {
+      await this.resetDocumentText();
+      return;
+    }
+
+    const code = this.activeSnippet.code;
+    const targetChar = code[this.currentIndex];
+
+    this.statusBarItem.text = `Comp: "${text}" | Esperado: "${targetChar}" | Acento: "${this.pendingAccent}"`;
+
+    const isCorrect = text === targetChar;
+
+    if (isCorrect) {
+      await this.resetDocumentText();
+
+      this.lastCorrectChar = text;
+      this.lastCorrectTime = Date.now();
+      this.lastCorrectSource = 'composition';
+
+      this.pendingAccent = null;
+      this.metrics.recordKeystroke(true);
+      
+      this.history.push(this.currentIndex);
+      this.currentIndex++;
+
+      if (this.currentIndex > 0 && code[this.currentIndex - 1] === '\n') {
+        this.currentIndex = skipWhitespace(code, this.currentIndex);
+      }
+
+      if (this.currentIndex >= code.length) {
+        await this.completeGame();
+        return;
+      }
+
+      this.refresh(editor);
+    } else {
+      const composition = ACCENT_MAP[targetChar];
+      if (composition && composition.accents.includes(text)) {
+        this.pendingAccent = text;
+        return;
+      }
+
+      await this.resetDocumentText();
+
+      this.metrics.recordKeystroke(false);
+      this.errorIndex = this.errorIndex === -1 ? this.currentIndex : this.errorIndex;
+      this.refresh(editor);
+    }
   }
 
   async handleBackspace(): Promise<void> {
@@ -201,6 +317,7 @@ export class GameManager {
 
     if (this.pendingAccent !== null) {
       this.pendingAccent = null;
+      await this.resetDocumentText();
       this.refresh(editor);
       return;
     }
@@ -271,6 +388,9 @@ export class GameManager {
 
     this.state = 'idle';
     this.pendingAccent = null;
+    this.lastCorrectChar = '';
+    this.lastCorrectTime = 0;
+    this.lastCorrectSource = null;
 
     this.disposables.forEach((d) => d.dispose());
     this.disposables = [];

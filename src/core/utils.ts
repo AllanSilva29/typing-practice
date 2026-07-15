@@ -76,3 +76,19 @@ export const ACCENT_MAP: { [key: string]: { accents: string[], base: string } } 
   'Ö': { accents: ['¨', '"'], base: 'O' },
   'Ü': { accents: ['¨', '"'], base: 'U' },
 };
+
+export function isDoubleTrigger(charA: string, charB: string): boolean {
+  if (charA === charB) return true;
+
+  const compA = ACCENT_MAP[charA];
+  if (compA && (compA.base === charB || compA.accents.includes(charB))) {
+    return true;
+  }
+
+  const compB = ACCENT_MAP[charB];
+  if (compB && (compB.base === charA || compB.accents.includes(charA))) {
+    return true;
+  }
+
+  return false;
+}
