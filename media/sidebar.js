@@ -5,6 +5,7 @@ const stopBtn = document.getElementById('stop-btn');
 const resetBtn = document.getElementById('reset-btn');
 const langSelect = document.getElementById('language-select');
 const diffSelect = document.getElementById('difficulty-select');
+const modeSelect = document.getElementById('mode-select');
 
 const statTotal = document.getElementById('stat-total');
 const statPpm = document.getElementById('stat-ppm');
@@ -16,16 +17,31 @@ const treeContainer = document.getElementById('tree-container');
 const oldState = vscode.getState() || {};
 if (oldState.language) langSelect.value = oldState.language;
 if (oldState.difficulty) diffSelect.value = oldState.difficulty;
+if (oldState.mode) modeSelect.value = oldState.mode;
 
 function saveState() {
   vscode.setState({
     language: langSelect.value,
-    difficulty: diffSelect.value
+    difficulty: diffSelect.value,
+    mode: modeSelect.value
   });
 }
 
 langSelect.addEventListener('change', saveState);
 diffSelect.addEventListener('change', saveState);
+modeSelect.addEventListener('change', () => {
+  saveState();
+  vscode.postMessage({
+    type: 'modeChanged',
+    mode: modeSelect.value
+  });
+});
+
+// Envia o modo inicial ao carregar a extensão para sincronizar com o backend
+vscode.postMessage({
+  type: 'modeChanged',
+  mode: modeSelect.value
+});
 
 startBtn.addEventListener('click', () => {
   vscode.postMessage({

@@ -8,6 +8,7 @@ import { ProgressService } from '../core/services/progressService';
 export class SidebarProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = 'typingPractice.sidebar';
   private _view?: vscode.WebviewView;
+  private currentMode: 'standard' | 'auto' = 'standard';
 
   constructor(
     private readonly _extensionUri: vscode.Uri,
@@ -15,7 +16,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     private readonly _gameManager: GameManager
   ) {
     this._gameManager.registerCallbacks(
-      (stats) => this.handleGameComplete(stats),
+      (stats, mode) => this.handleGameComplete(stats, mode),
       () => this.handleGameStop()
     );
   }
@@ -52,6 +53,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     webviewView.webview.onDidReceiveMessage(async (data) => {
       switch (data.type) {
+        case 'modeChanged': {
+          this.currentMode = data.mode;
+          this.sendStateToWebview(this.currentMode);
+          break;
+        }
         case 'startPractice': {
           const { language, difficulty } = data.filters;
           const snippet = this.getRandomSnippet(language, difficulty);
@@ -59,13 +65,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             vscode.window.showWarningMessage('Nenhum snippet correspondente aos filtros foi encontrado.');
             break;
           }
-          await this._gameManager.start(snippet);
-          this.sendStateToWebview();
+          await this._gameManager.start(snippet, this.currentMode);
+          this.sendStateToWebview(this.currentMode);
           break;
         }
         case 'stopPractice': {
           await this._gameManager.stop(false);
-          this.sendStateToWebview();
+          this.sendStateToWebview(this.currentMode);
           break;
         }
         case 'resetProgress': {
@@ -76,8 +82,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           );
           if (confirm !== 'Sim, resetar') break;
           
-          await ProgressService.getInstance().clearProgress();
-          this.sendStateToWebview();
+          await ProgressService.getInstance().clearProgress(this.currentMode);
+          this.sendStateToWebview(this.currentMode);
           vscode.window.showInformationMessage('Progresso de digitação resetado com sucesso.');
           break;
         }
@@ -87,8 +93,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             vscode.window.showErrorMessage('Snippet não encontrado no banco de dados.');
             break;
           }
-          await this._gameManager.start(snippet);
-          this.sendStateToWebview();
+          await this._gameManager.start(snippet, this.currentMode);
+          this.sendStateToWebview(this.currentMode);
           break;
         }
         case 'openFolderMetadata': {
@@ -99,7 +105,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       }
     });
 
-    this.sendStateToWebview();
+    this.sendStateToWebview(this.currentMode);
   }
 
   private async openFolderMetadataMarkdown(relativePath: string): Promise<void> {
@@ -131,20 +137,23 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     return filtered[randomIndex];
   }
 
-  private async handleGameComplete(stats: { ppm: number; accuracy: number; snippetId: string }): Promise<void> {
-    await ProgressService.getInstance().addRecord(stats);
+  private async handleGameComplete(
+    stats: { ppm: number; accuracy: number; snippetId: string },
+    mode: 'standard' | 'auto'
+  ): Promise<void> {
+    await ProgressService.getInstance().addRecord(stats, mode);
     vscode.window.showInformationMessage(`Snippet concluído! PPM: ${stats.ppm} | Precisão: ${stats.accuracy}%`);
-    this.sendStateToWebview();
+    this.sendStateToWebview(this.currentMode);
   }
 
   private handleGameStop(): void {
-    this.sendStateToWebview();
+    this.sendStateToWebview(this.currentMode);
   }
 
-  private sendStateToWebview(): void {
+  private sendStateToWebview(mode: 'standard' | 'auto' = 'standard'): void {
     if (!this._view) return;
     const isPlaying = this._gameManager.isPlaying;
-    const progressState = ProgressService.getInstance().getProgressState(isPlaying);
+    const progressState = ProgressService.getInstance().getProgressState(isPlaying, mode);
     this._view.webview.postMessage({
       type: 'updateState',
       ...progressState,
