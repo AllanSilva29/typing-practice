@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { Snippet, SnippetService } from './services/snippetService';
 import { AISuggestionService } from './services/aiSuggestionService';
-import { skipWhitespace, ACCENT_MAP, isDoubleTrigger, positionAt } from './utils';
+import { skipWhitespace, ACCENT_MAP, isDoubleTrigger, positionAt, getCommentPrefix, getLevenshteinDistance, cleanUserText } from './utils';
 import { CodeExecutionService } from './services/codeExecutionService';
 import { GameDecoratorService } from './services/gameDecoratorService';
 import { FileHandler } from './handlers/fileHandler';
@@ -20,7 +20,12 @@ export class GameManager {
   private lastCorrectSource: 'type' | 'composition' | null = null;
   private isResettingDocument: boolean = false;
 
-  private state: 'idle' | 'playing' | 'completed' = 'idle';
+  private state: 'idle' | 'playing' | 'completed' | 'user_turn' = 'idle';
+  private mode: 'standard' | 'auto' = 'standard';
+  private isAutoTyping: boolean = false;
+  private userTurnStartTime: number = 0;
+  private tempFilesToCleanup: vscode.Uri[] = [];
+
   private suppressor = new AISuggestionService();
   private executor = new CodeExecutionService();
   private decorator = new GameDecoratorService();
@@ -35,11 +40,11 @@ export class GameManager {
     99
   );
 
-  private onCompleteCallback?: (stats: { ppm: number; accuracy: number; snippetId: string }) => void;
+  private onCompleteCallback?: (stats: { ppm: number; accuracy: number; snippetId: string }, mode: 'standard' | 'auto') => void;
   private onStopCallback?: () => void;
 
   registerCallbacks(
-    onComplete: (stats: { ppm: number; accuracy: number; snippetId: string }) => void,
+    onComplete: (stats: { ppm: number; accuracy: number; snippetId: string }, mode: 'standard' | 'auto') => void,
     onStop: () => void
   ): void {
     this.onCompleteCallback = onComplete;
@@ -62,13 +67,15 @@ export class GameManager {
     return this.activeSnippet;
   }
 
-  async start(snippet: Snippet): Promise<void> {
+  async start(snippet: Snippet, mode: 'standard' | 'auto' = 'standard'): Promise<void> {
     if (this.state !== 'idle') {
       await this.stop(false);
     }
 
+    this.mode = mode;
     this.initializeState(snippet);
     await this.suppressor.suppress();
+    await this.cleanupTempFiles();
 
     try {
       const uri = vscode.Uri.parse(`typing-practice-metadata:/${snippet.language}/${snippet.relativePath}`);
@@ -84,9 +91,17 @@ export class GameManager {
     this.executor.showExplanation(snippet.id);
 
     const difficultyLabel = snippet.difficulty.toUpperCase();
-    this.statusBarItem.text = `$(keyboard) Praticando: ${snippet.name} (${difficultyLabel})`;
+    if (this.mode === 'auto') {
+      this.statusBarItem.text = `$(sync~spin) Auto-digitando: ${snippet.name} (${difficultyLabel})`;
+    } else {
+      this.statusBarItem.text = `$(keyboard) Praticando: ${snippet.name} (${difficultyLabel})`;
+    }
     this.statusBarItem.tooltip = `Prática de Digitação: ${snippet.comment}`;
     this.statusBarItem.show();
+
+    if (this.mode === 'auto') {
+      this.runAutoTyping(editor, snippet);
+    }
   }
 
   private initializeState(snippet: Snippet): void {
@@ -100,6 +115,8 @@ export class GameManager {
     this.lastCorrectTime = Date.now();
     this.lastCorrectSource = null;
     this.isResettingDocument = false;
+    this.isAutoTyping = false;
+    this.userTurnStartTime = 0;
     this.explanationStatusBarItem.hide();
     this.metrics.start();
   }
@@ -163,10 +180,23 @@ export class GameManager {
       await this.handleCompositionType(insertedText);
     });
 
-    this.disposables.push(selSub, activeEditorSub, docChangeSub);
+    const saveSub = vscode.workspace.onDidSaveTextDocument(async (doc) => {
+      if (this.state === 'user_turn' && this.currentUri && doc.uri.toString() === this.currentUri.toString()) {
+        await this.completeUserTurn(doc.getText());
+      }
+    });
+
+    this.disposables.push(selSub, activeEditorSub, docChangeSub, saveSub);
   }
 
   async handleType(character: string): Promise<void> {
+    if (this.isAutoTyping) {
+      if (character === '\n') {
+        this.isAutoTyping = false;
+      }
+      return;
+    }
+
     if (this.state === 'completed') {
       if (character === '\n') {
         await this.navigateToNextOrPrev(true);
@@ -244,7 +274,12 @@ export class GameManager {
     }
 
     if (this.currentIndex >= code.length) {
-      await this.completeGame();
+      if (this.mode === 'auto') {
+        this.isAutoTyping = false;
+        await this.startUserTurn(this.activeSnippet!);
+      } else {
+        await this.completeGame();
+      }
       return;
     }
 
@@ -272,6 +307,7 @@ export class GameManager {
   }
 
   private async handleCompositionType(text: string): Promise<void> {
+    if (this.isAutoTyping) return;
     if (this.state !== 'playing' || !this.activeSnippet || !this.currentUri) return;
 
     const editor = vscode.window.activeTextEditor;
@@ -314,7 +350,12 @@ export class GameManager {
       }
 
       if (this.currentIndex >= code.length) {
-        await this.completeGame();
+        if (this.mode === 'auto') {
+          this.isAutoTyping = false;
+          await this.startUserTurn(this.activeSnippet!);
+        } else {
+          await this.completeGame();
+        }
         return;
       }
 
@@ -335,6 +376,8 @@ export class GameManager {
   }
 
   async handleBackspace(): Promise<void> {
+    if (this.isAutoTyping) return;
+
     if (this.state === 'completed') {
       await this.navigateToNextOrPrev(false);
       return;
@@ -389,7 +432,7 @@ export class GameManager {
     this.executor.execute('', '', snippetId);
 
     if (this.onCompleteCallback) {
-      this.onCompleteCallback({ ppm, accuracy, snippetId });
+      this.onCompleteCallback({ ppm, accuracy, snippetId }, 'standard');
     }
   }
 
@@ -413,7 +456,7 @@ export class GameManager {
     }
     this.activeSnippet = null;
 
-    await this.start(targetSnippet);
+    await this.start(targetSnippet, this.mode);
   }
 
   async stop(completed: boolean = false): Promise<void> {
@@ -424,6 +467,7 @@ export class GameManager {
     this.lastCorrectChar = '';
     this.lastCorrectTime = 0;
     this.lastCorrectSource = null;
+    this.isAutoTyping = false;
 
     this.disposables.forEach((d) => d.dispose());
     this.disposables = [];
@@ -435,6 +479,8 @@ export class GameManager {
       await FileHandler.deleteTempFile(this.currentUri);
       this.currentUri = null;
     }
+
+    await this.cleanupTempFiles();
 
     this.activeSnippet = null;
     this.statusBarItem.hide();
@@ -448,5 +494,174 @@ export class GameManager {
   dispose(): void {
     this.statusBarItem.dispose();
     this.explanationStatusBarItem.dispose();
+  }
+
+  private async waitWithSkip(ms: number): Promise<void> {
+    const start = Date.now();
+    while (Date.now() - start < ms && this.isAutoTyping) {
+      await new Promise(resolve => setTimeout(resolve, 20));
+    }
+  }
+
+  private async runAutoTyping(editor: vscode.TextEditor, snippet: Snippet): Promise<void> {
+    this.isAutoTyping = true;
+    const code = snippet.code;
+
+    await this.waitWithSkip(800);
+
+    while (this.state === 'playing' && this.isAutoTyping && this.currentIndex < code.length) {
+      const activeEditor = vscode.window.activeTextEditor;
+      if (!activeEditor || !this.currentUri || activeEditor.document.uri.toString() !== this.currentUri.toString()) {
+        await this.waitWithSkip(200);
+        continue;
+      }
+
+      const char = code[this.currentIndex];
+      await this.handleTypeInternal(char);
+
+      if (this.currentIndex >= code.length) {
+        break;
+      }
+
+      const nextChar = code[this.currentIndex] || '';
+      const delay = this.getAutoTypingDelay(char, nextChar);
+      await this.waitWithSkip(delay);
+    }
+
+    this.isAutoTyping = false;
+
+    if (this.state === 'playing' && this.mode === 'auto') {
+      await this.startUserTurn(snippet);
+    }
+  }
+
+  private async handleTypeInternal(character: string): Promise<void> {
+    const code = this.activeSnippet!.code;
+    const targetChar = code[this.currentIndex];
+
+    let isCorrectChar = character === targetChar || (targetChar === '\n' && character === '\n');
+    this.metrics.recordKeystroke(isCorrectChar);
+
+    if (!isCorrectChar) return;
+
+    this.lastCorrectChar = character;
+    this.lastCorrectTime = Date.now();
+    this.lastCorrectSource = 'type';
+
+    this.history.push(this.currentIndex);
+    this.currentIndex++;
+
+    if (this.currentIndex > 0 && code[this.currentIndex - 1] === '\n') {
+      this.currentIndex = skipWhitespace(code, this.currentIndex);
+    }
+
+    const editor = vscode.window.activeTextEditor;
+    if (editor && this.currentUri && editor.document.uri.toString() === this.currentUri.toString()) {
+      this.refresh(editor);
+    }
+  }
+
+  private getAutoTypingDelay(char: string, nextChar: string): number {
+    const isWordBoundary = (c: string) => /[\s\.,;:\(\)\{\}\[\]]/.test(c);
+    if (isWordBoundary(char) && !isWordBoundary(nextChar)) {
+      return 250 + Math.random() * 350;
+    }
+    return 45 + Math.random() * 45;
+  }
+
+  private async startUserTurn(snippet: Snippet): Promise<void> {
+    this.state = 'user_turn';
+    this.userTurnStartTime = Date.now();
+
+    if (this.currentUri) {
+      await FileHandler.closeEditorIfOpen(this.currentUri);
+      await FileHandler.deleteTempFile(this.currentUri);
+      this.currentUri = null;
+    }
+
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (!workspaceFolders || workspaceFolders.length === 0) {
+      this.state = 'idle';
+      return;
+    }
+
+    const rootPath = workspaceFolders[0].uri.fsPath;
+    const initialText = "";
+
+    const fileUri = await FileHandler.writeTempFile(rootPath, snippet.language, initialText);
+    const document = await vscode.workspace.openTextDocument(fileUri);
+    const editor = await vscode.window.showTextDocument(document, vscode.ViewColumn.One, false);
+
+    this.currentUri = fileUri;
+
+    const endPosition = new vscode.Position(0, 0);
+    editor.selection = new vscode.Selection(endPosition, endPosition);
+
+    this.statusBarItem.text = `$(edit) Deixa que eu faço: Agora é sua vez.`;
+    this.statusBarItem.tooltip = `Agora é sua vez! Digite o código correspondente de cabeça e salve o arquivo (Ctrl+S) para ver o diff.`;
+    this.statusBarItem.show();
+
+    this.explanationStatusBarItem.text = `$(info) Agora é sua vez.`;
+    this.explanationStatusBarItem.tooltip = `Digite o código correspondente de cabeça e salve o arquivo (Ctrl+S) para ver o diff.`;
+    this.explanationStatusBarItem.show();
+
+    vscode.window.showInformationMessage('Agora sua vez! Digite o exercício de cabeça e salve o arquivo para finalizar.');
+  }
+
+  private async completeUserTurn(userText: string): Promise<void> {
+    const snippet = this.activeSnippet!;
+    const commentPrefix = getCommentPrefix(snippet.language);
+    const cleanedUser = cleanUserText(userText, commentPrefix);
+    const expected = snippet.code.trim();
+
+    const dist = getLevenshteinDistance(expected, cleanedUser);
+    const maxLen = Math.max(expected.length, cleanedUser.length);
+    const accuracy = maxLen > 0 ? Math.max(0, Math.round(((maxLen - dist) / maxLen) * 100)) : 100;
+
+    const timeInMs = Date.now() - this.userTurnStartTime;
+    const timeInMins = timeInMs / 60000;
+    const ppm = timeInMins > 0 ? Math.round((cleanedUser.length / 5) / timeInMins) : 0;
+
+    const userUri = this.currentUri!;
+    this.tempFilesToCleanup.push(userUri);
+
+    await FileHandler.closeEditorIfOpen(userUri);
+
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (workspaceFolders && workspaceFolders.length > 0) {
+      const rootPath = workspaceFolders[0].uri.fsPath;
+      const expectedUri = await FileHandler.writeTempFile(rootPath, snippet.language, expected);
+      this.tempFilesToCleanup.push(expectedUri);
+
+      const title = `${snippet.name} (Gabarito vs Seu Código)`;
+      await vscode.commands.executeCommand('vscode.diff', expectedUri, userUri, title);
+    }
+
+    this.state = 'completed';
+    this.disposables.forEach((d) => d.dispose());
+    this.disposables = [];
+    await this.suppressor.restore();
+    this.statusBarItem.hide();
+    this.explanationStatusBarItem.hide();
+
+    if (accuracy >= 80) {
+      if (this.onCompleteCallback) {
+        this.onCompleteCallback({ ppm, accuracy, snippetId: snippet.id }, 'auto');
+      }
+    } else {
+      vscode.window.showWarningMessage(`Exercício não concluído. Precisão mínima de 80% requerida (você obteve ${accuracy}%). Tente novamente!`);
+      if (this.onStopCallback) {
+        this.onStopCallback();
+      }
+    }
+  }
+
+  private async cleanupTempFiles(): Promise<void> {
+    for (const uri of this.tempFilesToCleanup) {
+      try {
+        await FileHandler.deleteTempFile(uri);
+      } catch {}
+    }
+    this.tempFilesToCleanup = [];
   }
 }
