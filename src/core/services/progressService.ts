@@ -42,21 +42,24 @@ export class ProgressService {
     return ProgressService.instance;
   }
 
-  public async addRecord(record: { ppm: number; accuracy: number; snippetId: string }): Promise<void> {
-    const history: GameRecord[] = this.context.globalState.get('history') || [];
+  public async addRecord(record: { ppm: number; accuracy: number; snippetId: string }, mode: 'standard' | 'auto' = 'standard'): Promise<void> {
+    const historyKey = mode === 'auto' ? 'autoHistory' : 'history';
+    const history: GameRecord[] = this.context.globalState.get(historyKey) || [];
     history.push({
       ...record,
       timestamp: Date.now()
     });
-    await this.context.globalState.update('history', history);
+    await this.context.globalState.update(historyKey, history);
   }
 
-  public async clearProgress(): Promise<void> {
-    await this.context.globalState.update('history', []);
+  public async clearProgress(mode: 'standard' | 'auto' = 'standard'): Promise<void> {
+    const historyKey = mode === 'auto' ? 'autoHistory' : 'history';
+    await this.context.globalState.update(historyKey, []);
   }
 
-  public getProgressState(isPlaying: boolean): ProgressState {
-    const history: GameRecord[] = this.context.globalState.get('history') || [];
+  public getProgressState(isPlaying: boolean, mode: 'standard' | 'auto' = 'standard'): ProgressState {
+    const historyKey = mode === 'auto' ? 'autoHistory' : 'history';
+    const history: GameRecord[] = this.context.globalState.get(historyKey) || [];
     const totalRuns = history.length;
 
     const avgPpm = totalRuns > 0
@@ -102,3 +105,4 @@ export class ProgressService {
     };
   }
 }
+

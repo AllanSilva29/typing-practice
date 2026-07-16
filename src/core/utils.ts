@@ -92,3 +92,49 @@ export function isDoubleTrigger(charA: string, charB: string): boolean {
 
   return false;
 }
+
+export function getCommentPrefix(language: string): string {
+  const lang = language.toLowerCase();
+  if (lang === 'python') {
+    return '#';
+  }
+  return '//';
+}
+
+export function getLevenshteinDistance(s1: string, s2: string): number {
+  if (s1 === s2) return 0;
+  if (s1.length === 0) return s2.length;
+  if (s2.length === 0) return s1.length;
+
+  let prevRow = new Array(s2.length + 1);
+  let currRow = new Array(s2.length + 1);
+
+  for (let j = 0; j <= s2.length; j++) {
+    prevRow[j] = j;
+  }
+
+  for (let i = 1; i <= s1.length; i++) {
+    currRow[0] = i;
+    for (let j = 1; j <= s2.length; j++) {
+      const cost = s1[i - 1] === s2[j - 1] ? 0 : 1;
+      currRow[j] = Math.min(
+        currRow[j - 1] + 1,     // insertion
+        prevRow[j] + 1,         // deletion
+        prevRow[j - 1] + cost   // substitution
+      );
+    }
+    const temp = prevRow;
+    prevRow = currRow;
+    currRow = temp;
+  }
+  return prevRow[s2.length];
+}
+
+export function cleanUserText(text: string, commentPrefix: string): string {
+  const lines = text.split(/\r?\n/);
+  if (lines.length > 0 && lines[0].trim().startsWith(`${commentPrefix} agora sua vez.`)) {
+    lines.shift();
+  }
+  return lines.join('\n').trim();
+}
+
