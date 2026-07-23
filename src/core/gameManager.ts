@@ -42,13 +42,17 @@ export class GameManager {
 
   private onCompleteCallback?: (stats: { ppm: number; accuracy: number; snippetId: string }, mode: 'standard' | 'auto') => void;
   private onStopCallback?: () => void;
+  private onComboCallback?: (combo: number) => void;
+  private comboCount: number = 0;
 
   registerCallbacks(
     onComplete: (stats: { ppm: number; accuracy: number; snippetId: string }, mode: 'standard' | 'auto') => void,
-    onStop: () => void
+    onStop: () => void,
+    onCombo?: (combo: number) => void
   ): void {
     this.onCompleteCallback = onComplete;
     this.onStopCallback = onStop;
+    this.onComboCallback = onCombo;
   }
 
   get isPlaying(): boolean {
@@ -117,6 +121,7 @@ export class GameManager {
     this.isResettingDocument = false;
     this.isAutoTyping = false;
     this.userTurnStartTime = 0;
+    this.comboCount = 0;
     this.explanationStatusBarItem.hide();
     this.metrics.start();
   }
@@ -255,6 +260,7 @@ export class GameManager {
 
     const isError = this.errorIndex !== -1 || !isCorrectChar;
     if (isError) {
+      this.comboCount = 0;
       this.errorIndex = this.errorIndex === -1 ? this.currentIndex : this.errorIndex;
       this.refresh(editor);
       return;
@@ -264,6 +270,15 @@ export class GameManager {
       this.lastCorrectChar = character;
       this.lastCorrectTime = Date.now();
       this.lastCorrectSource = 'type';
+
+      const prevChar = this.currentIndex > 0 ? code[this.currentIndex - 1] : '';
+      const isWordEnd = (/[a-zA-Z0-9_$]/.test(prevChar) && /[\s;,.()\[\]{}:"']/.test(targetChar)) || this.currentIndex === code.length - 1;
+      if (isWordEnd) {
+        this.comboCount++;
+        if (this.onComboCallback) {
+          this.onComboCallback(this.comboCount);
+        }
+      }
     }
 
     this.history.push(this.currentIndex);
@@ -384,6 +399,8 @@ export class GameManager {
     }
 
     if (this.state !== 'playing' || !this.activeSnippet || !this.currentUri) return;
+
+    this.comboCount = 0;
 
     const editor = vscode.window.activeTextEditor;
     if (!editor || editor.document.uri.toString() !== this.currentUri.toString()) {

@@ -6,6 +6,7 @@ const resetBtn = document.getElementById('reset-btn');
 const langSelect = document.getElementById('language-select');
 const diffSelect = document.getElementById('difficulty-select');
 const modeSelect = document.getElementById('mode-select');
+const comboToggle = document.getElementById('combo-effects-toggle');
 
 const statTotal = document.getElementById('stat-total');
 const statPpm = document.getElementById('stat-ppm');
@@ -18,17 +19,20 @@ const oldState = vscode.getState() || {};
 if (oldState.language) langSelect.value = oldState.language;
 if (oldState.difficulty) diffSelect.value = oldState.difficulty;
 if (oldState.mode) modeSelect.value = oldState.mode;
+if (oldState.comboEffects !== undefined) comboToggle.checked = oldState.comboEffects;
 
 function saveState() {
   vscode.setState({
     language: langSelect.value,
     difficulty: diffSelect.value,
-    mode: modeSelect.value
+    mode: modeSelect.value,
+    comboEffects: comboToggle.checked
   });
 }
 
 langSelect.addEventListener('change', saveState);
 diffSelect.addEventListener('change', saveState);
+comboToggle.addEventListener('change', saveState);
 modeSelect.addEventListener('change', () => {
   saveState();
   vscode.postMessage({
@@ -83,8 +87,67 @@ window.addEventListener('message', event => {
     // Atualiza Árvore de Exercícios e Histórico
     renderTreeView(snippets || [], history || []);
     renderHistoryList(history || []);
+  } else if (message.type === 'comboPop') {
+    showComboPop(message.combo);
   }
 });
+
+const DMC_RANKS = {
+  5: { rank: 'D', title: 'DIRTY!', color: '#3a86ff' },
+  10: { rank: 'C', title: 'CRAZY!', color: '#00b4d8' },
+  20: { rank: 'B', title: 'BRUTAL!', color: '#06d6a0' },
+  30: { rank: 'A', title: 'ATOMIC!', color: '#ffb703' },
+  40: { rank: 'S', title: 'STYLISH!', color: '#ff006e' },
+  50: { rank: 'SS', title: 'SICK SKILLS!', color: '#fb5607' },
+  60: { rank: 'SSS', title: "SMOKIN' SEXY STYLE!", color: '#ff0054' }
+};
+
+function getDmcRank(combo) {
+  if (DMC_RANKS[combo]) return DMC_RANKS[combo];
+  if (combo > 60 && combo % 10 === 0) {
+    return { rank: 'SSS', title: "ULTIMATE STYLE!", color: '#ff0054' };
+  }
+  return null;
+}
+
+function showComboPop(combo) {
+  if (comboToggle && !comboToggle.checked) return;
+
+  let container = document.getElementById('combo-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'combo-container';
+    container.className = 'combo-container';
+    document.body.appendChild(container);
+  }
+
+  const popEl = document.createElement('div');
+  popEl.className = 'combo-pop-item';
+  popEl.textContent = `${combo}x 🔥`;
+  container.appendChild(popEl);
+
+  popEl.addEventListener('animationend', () => {
+    popEl.remove();
+  });
+
+  const rankInfo = getDmcRank(combo);
+  if (rankInfo) {
+    showDmcRankPop(container, rankInfo);
+  }
+}
+
+function showDmcRankPop(container, rankInfo) {
+  const rankEl = document.createElement('div');
+  rankEl.className = 'dmc-rank-item';
+  rankEl.style.setProperty('--rank-color', rankInfo.color);
+  rankEl.innerHTML = `<span class="dmc-rank-badge">${rankInfo.rank}</span> <span class="dmc-rank-title">${rankInfo.title}</span>`;
+
+  container.appendChild(rankEl);
+
+  rankEl.addEventListener('animationend', () => {
+    rankEl.remove();
+  });
+}
 
 function renderTreeView(snippets, history = []) {
   if (snippets.length === 0) {

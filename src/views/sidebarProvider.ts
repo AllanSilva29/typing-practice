@@ -17,8 +17,15 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   ) {
     this._gameManager.registerCallbacks(
       (stats, mode) => this.handleGameComplete(stats, mode),
-      () => this.handleGameStop()
+      () => this.handleGameStop(),
+      (combo) => this.handleCombo(combo)
     );
+  }
+
+  private handleCombo(combo: number): void {
+    if (this._view) {
+      this._view.webview.postMessage({ type: 'comboPop', combo });
+    }
   }
 
   public resolveWebviewView(

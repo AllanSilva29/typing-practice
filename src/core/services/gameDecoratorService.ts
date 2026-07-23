@@ -14,7 +14,7 @@ export class GameDecoratorService {
 
     this.errorDecoration = vscode.window.createTextEditorDecorationType({
       backgroundColor: 'rgba(239, 68, 68, 0.25)',
-      borderBottom: '2px solid rgba(239, 68, 68, 0.8)',
+      border: '1px solid rgba(239, 68, 68, 0.8)',
       borderRadius: '2px'
     });
 
@@ -29,7 +29,7 @@ export class GameDecoratorService {
     editor.setDecorations(this.remainingDecoration, []);
   }
 
-  public update(editor: vscode.TextEditor, code: string, currentIndex: number, errorIndex: number): void {
+  public update(editor: vscode.TextEditor, code: string, currentIndex: number, errorIndex: number, _lineExplanations?: Record<number, string>): void {
     const endCorrectOffset = errorIndex !== -1 ? currentIndex : currentIndex;
     const correctRange = new vscode.Range(
       new vscode.Position(0, 0),
